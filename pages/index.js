@@ -9,7 +9,7 @@ export default function Home() {
 
       <div className="flex justify-between">
         <div className="flex flex-col ml-8 text-left mt-14 ">
-          <h1 className=" text-6xl font-inter font-bold text-gray-800 mt-5">Welcome Tramps!</h1>
+          <h1 className=" text-6xl font-inter font-bold text-gray-800 mt-5 ">Welcome <span className="text-green-700"> Tramps!</span></h1>
           <p className="text-2xl font-inter text-gray-600 mt-5">This is some description text to make the layout more interesting.</p>
           <Button className=" w-36 h-12 hover:bg-green-700 text-lg bg-green-600 mt-5 p-2">Learn More</Button>
         </div>

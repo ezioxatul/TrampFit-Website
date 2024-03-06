@@ -108,7 +108,7 @@ function Navbar() {
                 href="#"
                 key={page}
                 sx={{ color: 'grey', display: 'block',mt:2 }}
-                className=' hover:text-black border-none block mt-3 text-gray-400 text-base  mr-10 
+                className=' hover:text-green-700 border-none block mt-3 text-gray-400 text-base  mr-10 
                 transition ease-in-out delay-3'
                 >
                 {page}
