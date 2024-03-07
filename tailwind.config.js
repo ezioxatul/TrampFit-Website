@@ -16,7 +16,9 @@ module.exports = {
         "2xl": "1400px",
       },
     },
-    extend: {
+    extend: {fontFamily: {
+      play: ["Play", "sans-serif"],
+    },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",

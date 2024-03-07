@@ -17,7 +17,16 @@ const pages = ['Browse Gym', 'Membership', 'Partner Login' , 'User Login'];
 const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
 
 function Navbar() {
+  const [anchorElNav, setAnchorElNav] = useState(null);
     const [anchorElUser, setAnchorElUser] = useState(null);
+
+    const handleOpenNavMenu = (event) => {
+      setAnchorElNav(event.currentTarget);
+    };
+
+    const handleCloseNavMenu = () => {
+      setAnchorElNav(null);
+    };
 
     const handleOpenUserMenu = (event) => {
         setAnchorElUser(event.currentTarget);
@@ -28,7 +37,7 @@ function Navbar() {
     };  
     
   return (
-    <AppBar position="sticky" className=' bg-white shadow-none bg-opacity-30'>
+    <AppBar position="sticky" className=' bg-white shadow-none bg-opacity-30 border border-gray-100'>
       <Container maxWidth="xl" className=' h-20'>
         <Toolbar disableGutters>
           <Typography
@@ -39,7 +48,6 @@ function Navbar() {
             sx={{
               mr: 2,
               display: { xs: 'none', md: 'flex' },
-              fontFamily: 'monospace',
               fontWeight: 700,
               letterSpacing: '.3rem',
               color: 'inherit',
@@ -57,17 +65,21 @@ function Navbar() {
               size="large"
               aria-label="account of current user"
               aria-controls="menu-appbar"
+              onClick={handleOpenNavMenu}
               aria-haspopup="true"      
             >
               <MenuIcon />
             </IconButton>
             <Menu
               id="menu-appbar"
+              anchorEl={anchorElNav}
               anchorOrigin={{
                 vertical: 'bottom',
                 horizontal: 'left',
               }}
               keepMounted
+              open={Boolean(anchorElNav)}
+              onClose={handleCloseNavMenu}
               transformOrigin={{
                 vertical: 'top',
                 horizontal: 'left',
@@ -77,7 +89,7 @@ function Navbar() {
               }}
             >
               {pages.map((page) => (
-                <MenuItem key={page}>
+                <MenuItem key={page} onClick={handleCloseNavMenu}>
                   <Typography textAlign="center">{page}</Typography>
                 </MenuItem>
               ))}
@@ -105,6 +117,7 @@ function Navbar() {
           <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' },justifyContent:'center'}}>
             {pages.map((page) => (
               <Link 
+                onClick={handleCloseNavMenu}
                 href="#"
                 key={page}
                 sx={{ color: 'grey', display: 'block',mt:2 }}
