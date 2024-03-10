@@ -37,7 +37,7 @@ function Navbar() {
     };  
     
   return (
-    <AppBar position="sticky" className=' bg-white shadow-none bg-opacity-30 border border-gray-100'>
+    <AppBar position="sticky" className=' bg-white shadow-none bg-opacity-30 backdrop-blur border border-gray-100'>
       <Container maxWidth="xl" className=' h-20'>
         <Toolbar disableGutters>
           <Typography
@@ -57,7 +57,8 @@ function Navbar() {
 
             className=' text-black'
           >
-            TrampFit
+            <Link href="/">TrampFit</Link>
+            
           </Typography>
 
           <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
