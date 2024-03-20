@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import { useEffect, useState } from 'react';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
@@ -11,50 +11,52 @@ import Avatar from '@mui/material/Avatar';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import AdbIcon from '@mui/icons-material/Adb';
-import Link  from 'next/link';
+import Link from 'next/link';
 
-const pages = ['Browse Gym', 'Membership', 'Partner Login' , 'User Login'];
+const pages = ['Browse Gym', 'Membership', 'Partner Login', 'User Login'];
 const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
 
-function Navbar() {
+function Navbar(props) {
   const [anchorElNav, setAnchorElNav] = useState(null);
-    const [anchorElUser, setAnchorElUser] = useState(null);
+  const [anchorElUser, setAnchorElUser] = useState(null);
+  const [avtar,setAvtar] = useState();
 
-    const handleOpenNavMenu = (event) => {
-      setAnchorElNav(event.currentTarget);
-    };
 
-    const handleCloseNavMenu = () => {
-      setAnchorElNav(null);
-    };
+  const handleOpenNavMenu = (event) => {
+    setAnchorElNav(event.currentTarget);
+  };
 
-    const handleOpenUserMenu = (event) => {
-        setAnchorElUser(event.currentTarget);
-    };
+  const handleCloseNavMenu = () => {
+    setAnchorElNav(null);
+  };
 
-    const handleCloseUserMenu = () => {
-        setAnchorElUser(null);
-    };  
-    
+  const handleOpenUserMenu = (event) => {
+    setAnchorElUser(event.currentTarget);
+  };
+
+  const handleCloseUserMenu = () => {
+    setAnchorElUser(null);
+  };
+
   return (
     <AppBar position="sticky" className=' bg-white shadow-none bg-opacity-30 backdrop-blur border border-gray-100'>
       <Container maxWidth="xl" className=' h-20'>
         <Toolbar disableGutters>
           <Typography
             variant="h6"
-sx={{
+            sx={{
               mr: 2,
               display: { xs: 'none', md: 'flex' },
-             fontWeight: 700,
-          letterSpacing: '.3rem',
-          color: 'inherit',
-          textDecoration: 'none',
-          mt:1.5
-        }}
+              fontWeight: 700,
+              letterSpacing: '.3rem',
+              color: 'inherit',
+              textDecoration: 'none',
+              mt: 1.5
+            }}
             className=' text-black'
           >
             <Link href="/">TrampFit</Link>
-            
+
           </Typography>
 
           <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
@@ -63,7 +65,7 @@ sx={{
               aria-label="account of current user"
               aria-controls="menu-appbar"
               onClick={handleOpenNavMenu}
-              aria-haspopup="true"      
+              aria-haspopup="true"
             >
               <MenuIcon />
             </IconButton>
@@ -93,34 +95,20 @@ sx={{
             </Menu>
           </Box>
           <AdbIcon sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }} />
-          <Typography
-            variant="h5"
-            noWrap
-            component="a"
-            href="#app-bar-with-responsive-menu"
-            sx={{
-              mr: 2,
-              display: { xs: 'flex', md: 'none' },
-              flexGrow: 1,
-              fontFamily: 'monospace',
-              fontWeight: 700,
-              letterSpacing: '.3rem',
-              color: 'inherit',
-              textDecoration: 'none',
-            }}
-          >
-            LOGO
-          </Typography>
-          <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' },justifyContent:'center'}}>
+          <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' }, justifyContent: 'center' }}>
             {pages.map((page) => (
-              <Link 
+              <Link
                 onClick={handleCloseNavMenu}
-                href="#"
+                href={
+                  page === 'User Login' ? '/login' : 
+                  page === 'Partner Login' ? '/partnerLogin' : 
+                  `/${page.toLowerCase()}`
+                }
                 key={page}
-                sx={{ color: 'grey', display: 'block',mt:2 }}
+                sx={{ color: 'grey', display: 'block', mt: 2 }}
                 className=' hover:text-green-700 border-none block mt-3 text-gray-400 text-base  mr-10 
                 transition ease-in-out delay-3'
-                >
+              >
                 {page}
               </Link>
             ))}
@@ -128,8 +116,8 @@ sx={{
 
           <Box sx={{ flexGrow: 0 }}>
             <Tooltip title="Open settings">
-              <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 , mt : 2}} >
-                <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
+              <IconButton onClick={handleOpenUserMenu} sx={{ p: 0, mt: 2 }} >
+                <Avatar>{props.avtarTag}</Avatar>
               </IconButton>
             </Tooltip>
             <Menu
@@ -149,11 +137,11 @@ sx={{
               open={Boolean(anchorElUser)}
               onClose={handleCloseUserMenu}
             >
-            {settings.map((setting) => (
+              {settings.map((setting) => (
                 <MenuItem key={setting} onClick={handleCloseUserMenu}>
                   <Typography textAlign="center">{setting}</Typography>
                 </MenuItem>
-            ))}
+              ))}
             </Menu>
           </Box>
         </Toolbar>

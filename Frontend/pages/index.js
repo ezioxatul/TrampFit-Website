@@ -1,9 +1,27 @@
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
+import { AvTimer } from "@mui/icons-material";
 import Image from 'next/image'
-
+import { useRouter } from "next/router";
+import { useState, useEffect } from "react";
 export default function Home() {
+  let router = useRouter().query.name
+  let [avtar, setAvtar] = useState();
+  
+  useEffect(() => {
+    if (router) {
+      let avtarName = router.split(' ');
+      let name = '';
+      avtarName.map((val) => {
+        name += val[0]
+      })
+      setAvtar(name.toUpperCase())
+    }
+
+  }, []);
+
+
   let benefits = [
     {
       span1: "One Pass To Your fitness",
@@ -21,7 +39,7 @@ export default function Home() {
   ]
   return (
     <>
-      <Navbar />
+      <Navbar key="1" avtarTag ={avtar} />
 
 
       {/* home section */}
@@ -69,7 +87,7 @@ export default function Home() {
               benefits.map((val) => {
                 return (
                   <div className="flex mt-10">
-                    <Image 
+                    <Image
                       src="/benefits1.png"
                       alt="icon"
                       width={64}
@@ -96,7 +114,7 @@ export default function Home() {
           </div>
         </div>
       </div>
-      <Footer/>
+      <Footer />
     </>
   );
 }

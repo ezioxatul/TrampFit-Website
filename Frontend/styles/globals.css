@@ -75,3 +75,14 @@
     @apply bg-background text-foreground;
   }
 }
+
+
+.outline_remove:focus{
+   
+ 
+}
+.focus-visible\:ring-offset-2:focus-visible{
+  border:none !important;
+  outline: none !important;
+  border-style: none;
+}
