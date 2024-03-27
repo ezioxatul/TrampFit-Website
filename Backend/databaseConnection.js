@@ -1,7 +1,8 @@
 const Sequelize = require('sequelize');
+const private = require('./private.json');
 
-const sequelize = new Sequelize('postgres','postgres.rporqcohnfrhyexerqaj' ,'Trampfit@2024', {
-    host: 'aws-0-ap-south-1.pooler.supabase.com',
+const sequelize = new Sequelize('postgres', private.username,private.password, {
+    host: private.host,
     dialect: 'postgres'
   });
 

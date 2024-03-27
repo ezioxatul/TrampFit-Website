@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
@@ -12,15 +12,19 @@ import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import AdbIcon from '@mui/icons-material/Adb';
 import Link from 'next/link';
+import Popup from './Popup';
+import { useRouter } from 'next/router';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const pages = ['Browse Gym', 'Membership', 'Partner Login', 'User Login'];
-const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
+const settings = ['Dashboard', 'Logout'];
 
 function Navbar(props) {
   const [anchorElNav, setAnchorElNav] = useState(null);
   const [anchorElUser, setAnchorElUser] = useState(null);
-  const [avtar,setAvtar] = useState();
-
+  const [open, setOpen] = useState();
+  let router = useRouter();
 
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
@@ -38,8 +42,50 @@ function Navbar(props) {
     setAnchorElUser(null);
   };
 
+  const LogOut = () => {
+    setOpen(true);
+  }
+
+  const cancel = () => {
+    setOpen(false);
+  }
+
+  const logoutEvent = () => {
+    localStorage.removeItem("token");
+    setOpen(false)
+    router.push('/');
+  }
+
+  const userDashboard = async () => {
+    try {
+      let token = localStorage.getItem("token");
+
+      const option = {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+
+      const authCheck = await fetch('http://localhost/userDashboardAuthentication', option);
+      const authCheckResponse = await authCheck.json();
+
+      if (authCheckResponse.response) {
+        setTimeout(()=>{
+          router.push('/userdashboard');
+        },1000);
+        
+      } else {
+        localStorage.removeItem("token");
+        toast.error(authCheckResponse.message);
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
   return (
-    <AppBar position="sticky" className=' bg-white shadow-none bg-opacity-30 backdrop-blur border border-gray-100'>
+    <AppBar position="sticky" className=' bg-white shadow-none bg-opacity-30 backdrop-blur border border-gray-100 '>
       <Container maxWidth="xl" className=' h-20'>
         <Toolbar disableGutters>
           <Typography
@@ -100,9 +146,9 @@ function Navbar(props) {
               <Link
                 onClick={handleCloseNavMenu}
                 href={
-                  page === 'User Login' ? '/login' : 
-                  page === 'Partner Login' ? '/partnerLogin' : 
-                  `/${page.toLowerCase()}`
+                  page === 'User Login' ? '/login' :
+                    page === 'Partner Login' ? '/partnerLogin' :
+                      `/${page.toLowerCase()}`
                 }
                 key={page}
                 sx={{ color: 'grey', display: 'block', mt: 2 }}
@@ -117,7 +163,10 @@ function Navbar(props) {
           <Box sx={{ flexGrow: 0 }}>
             <Tooltip title="Open settings">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0, mt: 2 }} >
-                <Avatar>{props.avtarTag}</Avatar>
+                {
+                  props.response && <Avatar src='/avtar.png'></Avatar>
+                }
+
               </IconButton>
             </Tooltip>
             <Menu
@@ -139,13 +188,21 @@ function Navbar(props) {
             >
               {settings.map((setting) => (
                 <MenuItem key={setting} onClick={handleCloseUserMenu}>
-                  <Typography textAlign="center">{setting}</Typography>
+                  {
+                    setting.toLowerCase() == 'logout' ?
+                      <>
+                        <Typography textAlign="center" onClick={LogOut}>{setting}</Typography>
+                        <Popup key={setting} open={open} title={"Do you Really want to Logout?"} cancel="Cancel" logout="Logout" cancelEvent={cancel} logoutEvent={logoutEvent} />
+                      </> :
+                      <Typography textAlign="center" onClick={userDashboard}>{setting}</Typography>
+                  }
                 </MenuItem>
               ))}
             </Menu>
           </Box>
         </Toolbar>
       </Container>
+      <ToastContainer />
     </AppBar>
   );
 }
