@@ -1,26 +1,49 @@
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
-import { AvTimer } from "@mui/icons-material";
 import Image from 'next/image'
-import { useRouter } from "next/router";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+
+
 export default function Home() {
-  let router = useRouter().query.name
+  let [response, setResponse] = useState();
   let [avtar, setAvtar] = useState();
-  
+
   useEffect(() => {
-    if (router) {
-      let avtarName = router.split(' ');
-      let name = '';
-      avtarName.map((val) => {
-        name += val[0]
-      })
-      setAvtar(name.toUpperCase())
+    try {
+      let token = localStorage.getItem("token");
+      if (token) {
+
+        const option = {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+
+        fetch('http://localhost/', option).then(async (response) => {
+
+          let tokenChecker = await response.json();
+          if (tokenChecker.response) {
+
+            setResponse(true);
+            setAvtar(tokenChecker.avtar);
+
+          } else {
+            setResponse(false);
+          }
+
+        }).catch((err) => {
+          console.log(err);
+        })
+
+      } else {
+        setResponse(false)
+      }
+    } catch (err) {
+      console.log(err);
     }
-
-  }, []);
-
+  });
 
   let benefits = [
     {
@@ -39,7 +62,7 @@ export default function Home() {
   ]
   return (
     <>
-      <Navbar key="1" avtarTag ={avtar} />
+      <Navbar response={response} avtar={avtar} />
 
 
       {/* home section */}

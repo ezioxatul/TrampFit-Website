@@ -1,7 +1,8 @@
 const express = require('express')
 const bodyParser = require('body-parser');
-const authenticateRouter = require('./Routes/userAuthenticationRoutes');
-const port = 80
+const userAuthenticateRouter = require('./Routes/userAuthenticationRoutes');
+const userDashboardRouter = require('./Routes/userDashboardRoutes')
+const {port} = require('./private.json');
 const App = express()
 
 // Apply MiddleWares
@@ -16,7 +17,8 @@ App.use(bodyParser.json());
 App.use(bodyParser.urlencoded({ extended: false}))
 
 // Applying the Router
-App.use(authenticateRouter);
+App.use(userAuthenticateRouter);
+App.use(userDashboardRouter);
 
 App.listen(port,()=>{
     console.log("local Server Started on Port "+port);
