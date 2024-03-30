@@ -17,4 +17,5 @@ router.get('/tokenCheck',jwtVerification,userDashboardController.tokenCheckContr
 // deleting the User Details From the DataBase
 router.delete('/deleteUserDetails',jwtVerification,userDashboardController.deleteUserInfoController)
 
+
 module.exports = router;

@@ -41,6 +41,8 @@ export default function UserDashboard() {
 
                     setPersonalInfo({...personalInfo});
 
+                    localStorage.setItem("fullName",personalInfo.name)
+    
                     setResponse(true)
 
                 } else {
@@ -53,14 +55,13 @@ export default function UserDashboard() {
         } catch (err) {
             console.log(err);
         }
-
-    });
+    },[]);
     return (
         <>
             <div className="flex flex-col min-h-screen">
                 <Navbar response={response}/>
                 <div className=" flex">
-                    <UserSideBar profileName = {personalInfo.name} mobileNumber={personalInfo.mobileNumber}/>
+                    <UserSideBar mobileNumber={personalInfo.mobileNumber} profileName={personalInfo.name}/>
                     <div className=" mx-auto mt-12">
                         <Avatar className=" w-36 h-36 text-6xl bg-black" src="/avtar.png"></Avatar>
                     </div>

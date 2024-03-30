@@ -147,6 +147,7 @@ function Navbar(props) {
                 onClick={handleCloseNavMenu}
                 href={
                   page === 'User Login' ? '/login' :
+                  page === 'Browse Gym' ? '/browseGym':
                     page === 'Partner Login' ? '/partnerLogin' :
                       `/${page.toLowerCase()}`
                 }
