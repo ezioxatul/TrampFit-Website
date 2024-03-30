@@ -12,9 +12,6 @@ const userLoginController = async (req, res) => {
         let gender = req.body.gender
         let city = req.body.city
 
-        let maxId = await signupModel.max('id');
-        maxId = maxId == null ? 1 : maxId + 1
-
         console.log(req.body)
 
         let data = await signupModel.create({
@@ -22,8 +19,7 @@ const userLoginController = async (req, res) => {
             mobileNumber: mobileNumber,
             email: email,
             gender: gender,
-            city: city,
-            uId: maxId
+            city: city
         })
 
         let token = generateToken({

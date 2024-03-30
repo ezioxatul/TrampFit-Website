@@ -13,13 +13,17 @@ import { useRouter } from "next/router";
 
 export default function deleteAccount() {
     let router = useRouter();
-    let phoneNumber = router.query.userInfo;
+    let queryParameter = router.query.userInfo;
+    let phoneNumber = queryParameter;
+
+    let[fullName,setFullName] = useState();
     let[buttonText,setButtonText] = useState("Request OTP");
     let[changingButton,setChangingButton] = useState(false);
     let[otp,setOtp] = useState("");
     let[response,setResponse] = useState(false);
     useEffect(()=>{
         let token = localStorage.getItem("token");
+        setFullName(localStorage.getItem("fullName"))
         const option = {
             method : "GET",
             headers : {
@@ -37,7 +41,7 @@ export default function deleteAccount() {
         }).catch((err)=>{
             setResponse(false);
         })
-    })
+    },[])
 
     const [open, setOpen] = useState();
 
@@ -93,7 +97,7 @@ export default function deleteAccount() {
             <div className="flex flex-col min-h-screen">
                 <Navbar response={response}/>
                 <div className=" flex">
-                    <UserSideBar mobileNumber={phoneNumber}/>
+                    <UserSideBar mobileNumber={phoneNumber} profileName={fullName}/>
                     <div className=" mb-10">
                         <h1 className=" font-semibold mt-8 ml-10 text-xl">When you delete your account :</h1>
                         <p className="mt-4 ml-10 text-lg">We will miss you !</p>

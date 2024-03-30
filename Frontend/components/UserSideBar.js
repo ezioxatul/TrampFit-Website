@@ -8,8 +8,11 @@ import LocalMallIcon from '@mui/icons-material/LocalMall';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Avatar } from "@mui/material";
 import Link from 'next/link';
+import { useRouter } from 'next/router';
+
 
 export default function UserSideBar(props) {
+    let router = useRouter();
     return (
         <>
             <div className=" w-80  m-[-8px] p-1 mb-10">
@@ -26,8 +29,8 @@ export default function UserSideBar(props) {
                                 </ListItemIcon>
                                 {
                                     index === 0 ? <Link href={"/userdashboard"}> <ListItemText primary={<span className="text-xl font-semibold">{text}</span>} className=" text-black p-3" /> </Link> :
-                                       <Link href={
-                                        index === 1 ? `/userdashboard/${props.mobileNumber}/sessionInfo` : 
+                                       <Link  href ={
+                                         index === 1 ? `/userdashboard/${props.mobileNumber}/sessionInfo` : 
                                         index === 2 ? `/userdashboard/${props.mobileNumber}/membershipInfo` :
                                         `/userdashboard/${props.mobileNumber}/deleteAccount`
                                        }> <ListItemText primary={text} className=" text-black" /> </Link>

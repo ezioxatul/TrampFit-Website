@@ -22,11 +22,6 @@ const signupModel = sequelize.define('signup', {
         type:DataTypes.STRING,
         allowNull:false,
         required:true
-    },uId:{
-        type:DataTypes.INTEGER,
-        allowNull:false,
-        required:true,
-        unique:true
     }
   }, {
     freezeTableName : true

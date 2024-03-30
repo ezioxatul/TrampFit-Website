@@ -76,6 +76,7 @@ const tokenCheckController = (req,res) =>{
     }
 }
 
+
 module.exports = {
     userDashboardAuthenticationController: userDashboardAuthenticationController,
     getUserPersonalDetailController: getUserPersonalDetailController,

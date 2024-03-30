@@ -189,7 +189,7 @@ const login = () => {
                             <CardDescription>{text == null ? "You will recieve a text to validate your number" :
                                 fieldController ? "OTP was sent to " :
                                     "Please enter your details"
-                            }<span className="font-semibold text-black">{fieldController ? text : ""}</span></CardDescription>
+                            }<span className="font-semibold text-black">{fieldController && text}</span></CardDescription>
                         </CardHeader>
                         <CardContent>
                             <form>
@@ -266,7 +266,7 @@ const login = () => {
                         </CardContent>
                         <CardFooter className="flex justify-center">
                             <Button className=" hover:bg-green-700 bg-green-600 w-96 mb-5" onClick={sendOtp}>{buttonText}</Button>
-                            <ToastContainer />
+                            {/* <ToastContainer /> */}
                         </CardFooter>
                     </Card>
                 </div>
