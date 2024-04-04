@@ -42,7 +42,7 @@ const Footer = () => {
                     <div className="m-2 ml-10 mr-10 flex justify-between">
                         {
                             footerBar.map((val) => {
-                                return <Link href="#" className="text-white text-lg">{val}</Link>
+                                return <Link href={val === 'Become a Partner' ? '/partner' : "#"} className="text-white text-lg">{val}</Link>
                             })
                         }
                     </div>
