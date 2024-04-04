@@ -103,7 +103,7 @@ export default function Home() {
 
       {/* benefits section */}
       <div className="flex flex-col mt-5 mb-28">
-        <h1 className="text-5xl text-center underline"><b>BENEFITS</b></h1>
+        <h1 className="text-5xl text-center"><b>BENEFITS</b></h1>
         <div className="flex justify-between mt-4">
           <div>
             {

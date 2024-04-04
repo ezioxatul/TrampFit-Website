@@ -85,7 +85,7 @@ function Navbar(props) {
   }
 
   return (
-    <AppBar position="sticky" className=' bg-white shadow-none bg-opacity-30 backdrop-blur border border-gray-100 '>
+    <AppBar position="sticky" className=' bg-white shadow-none bg-opacity-30 backdrop-blur '>
       <Container maxWidth="xl" className=' h-20'>
         <Toolbar disableGutters>
           <Typography
@@ -148,7 +148,7 @@ function Navbar(props) {
                 href={
                   page === 'User Login' ? '/login' :
                   page === 'Browse Gym' ? '/browseGym':
-                    page === 'Partner Login' ? '/partnerLogin' :
+                    page === 'Partner Login' ? '/partner/partnerLogin' :
                       `/${page.toLowerCase()}`
                 }
                 key={page}
