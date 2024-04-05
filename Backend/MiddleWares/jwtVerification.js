@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const {secret_key} = require('../private.json');
+const {user_secret_key} = require('../private.json');
 
 const jwtVerification = (req,res,next) => {
     try{
@@ -7,13 +7,14 @@ const jwtVerification = (req,res,next) => {
         token = token.split('Bearer ');
         token = token[1];
 
-        const verify = jwt.verify(token,secret_key);
+        const verify = jwt.verify(token,req.secretKey);
+        
         if(verify){
             req.userDetails = verify;
             next();
         } else {
             res.json({
-                message : "Invalid Token!!",
+                message : "Invalid Token !!",
                 response : false
             })
         }

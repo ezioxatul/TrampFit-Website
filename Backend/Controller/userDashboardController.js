@@ -6,13 +6,17 @@ const userDashboardAuthenticationController = (req, res) => {
             message: "User Authenticated Successfully",
             response: true
         })
-    } catch (err) {
+    }
+
+    catch (err) {
         res.json({  
             message: "Something went Wrong!!",
             response: false
         })
     }
 }
+
+
 
 const getUserPersonalDetailController = async (req, res) => {
     try {
@@ -38,6 +42,7 @@ const getUserPersonalDetailController = async (req, res) => {
         })
     }
 }
+
 
 const deleteUserInfoController = async(req,res) =>{
     try {

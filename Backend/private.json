@@ -1,7 +1,10 @@
 {
-    "secret_key" : "TrampfitSecretKey",
+    "admin_secret_key" : "AdminTrampfitSecretKey",
+    "user_secret_key" : "TrampfitSecretKey",
     "host" : "aws-0-ap-south-1.pooler.supabase.com",
     "username" : "postgres.rporqcohnfrhyexerqaj",
     "password" : "Trampfit@2024",
-    "port" : 80
+    "port" : 80,
+    "email_app_name" : "trampfit180@gmail.com",
+    "email_app_password" : "xbyy enkx varh eryu"
 }
