@@ -1,7 +1,9 @@
 const signupModel = require('../Models/signUpModel');
 const generateToken = require('../helper/generateToken');
 const generateUserAvtar = require('../helper/generateUserAvtar');
-
+const { user_secret_key } = require('../private.json');
+const transporter = require('../helper/sendEmailVerification');
+const pug = require('pug');
 // inserting user Data Inside Database
 const userLoginController = async (req, res) => {
     try {
@@ -25,13 +27,13 @@ const userLoginController = async (req, res) => {
         let token = generateToken({
             mobileNumber: data.mobileNumber,
             fullName: data.fullName
-        });
+        }, user_secret_key);
 
         fullName = generateUserAvtar(fullName);
 
         res.json({
             message: "Signup Successfully",
-            avtar : fullName,
+            avtar: fullName,
             token: token,
             response: true
         })
@@ -63,7 +65,7 @@ const rootAuthenticationController = (req, res) => {
         })
 
     } catch (err) {
-
+        console.log(err)
         res.json({
             message: "Something went Wrong !!",
             response: false
@@ -86,43 +88,84 @@ const userExistsController = async (req, res) => {
         })
 
         userInfo = JSON.parse(JSON.stringify(userInfo));
-        
-        if(userInfo != undefined){
+
+        if (userInfo != undefined) {
 
             let fullName = userInfo.fullName
 
             let token = generateToken({
-                fullName : fullName,
-                mobileNumber : mobileNumber
-            })
+                fullName: fullName,
+                mobileNumber: mobileNumber
+            }, user_secret_key)
 
             fullName = generateUserAvtar(fullName);
 
             res.json({
-                message : "User already exists",
-                response : true,
-                token : token,
-                avtar : fullName
+                message: "User already exists",
+                response: true,
+                token: token,
+                avtar: fullName
             })
 
         } else {
             res.json({
-                message : "User does not exists",
-                response : false
+                message: "User does not exists",
+                response: false
             })
         }
 
     } catch (err) {
         res.json({
-            message : "Something went wrong!!",
-            response : false
+            message: "Something went wrong!!",
+            response: false
         })
     }
+}
+
+
+const emailVerificationController = async (req, res) => {
+    try {
+        const receiverEmail = req.query.email;
+
+        let htmlContent = pug.renderFile('emailTemplate/userEmailVerification.pug');
+
+        const info = await transporter.sendMail({
+            from: '"Trampfit" <trampfit180@gmail.com>',
+            to: receiverEmail,
+            subject: "Email verification",
+            html: htmlContent
+        });
+
+        if (info) {
+
+            res.json({
+                response: true,
+                message: "Email send successfully"
+            })
+
+        } else {
+
+            res.json({
+                response: false,
+                message: "Email has not been send"
+            })
+
+        }
+
+    } catch (err) {
+        console.log(err)
+        res.json({
+            response: false,
+            message: "Something went wrong"
+        })
+    }
+
 }
 
 
 module.exports = {
     userLoginController: userLoginController,
     rootAuthenticationController: rootAuthenticationController,
-    userExistsController: userExistsController
+    userExistsController: userExistsController,
+    emailVerificationController: emailVerificationController
 }

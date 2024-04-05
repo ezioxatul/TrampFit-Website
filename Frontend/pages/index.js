@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 
 
 export default function Home() {
-  let [response, setResponse] = useState();
+  let [response, setResponse] = useState(false);
   let [avtar, setAvtar] = useState();
 
   useEffect(() => {

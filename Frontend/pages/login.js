@@ -38,6 +38,7 @@ const login = () => {
     let [fullNameValidation, setfullNameValidation] = useState("");
     let [emailValidation, setEmailValidation] = useState("");
 
+
     let [userDetails, setUserDetails] = useState({
         fullName: "",
         email: "",
@@ -105,13 +106,14 @@ const login = () => {
                     if (userExistsResponse.response) {
                         localStorage.setItem("token", userExistsResponse.token);
                         toast.success("Signed In Successfully");
-                        setTimeout(()=>{
+
+                        setTimeout(() => {
                             router.push({
                                 pathname: '/', query: {
                                     name: userExistsResponse.avtar
                                 }
                             })
-                        },6000);
+                        }, 6000);
                     } else {
                         toast.success("OTP Verified Successfully")
                         setFieldController(false);
@@ -138,41 +140,25 @@ const login = () => {
             } else if (userDetails.city === '') {
                 toast.error("City is mandatory")
             } else {
+
                 try {
-
                     const option = {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(userDetails)
+                        method: "GET"
                     }
 
-                    let userResponse = await fetch('http://localhost/userLogin', option);
-                    let jsonResponse = await userResponse.json();
+                    let sendEmailResponse = await fetch(`http://localhost/emailVerification?email=${userDetails.email}`, option);
+                    sendEmailResponse = await sendEmailResponse.json();
 
-                    if (jsonResponse.response) {
-
-                        localStorage.setItem('token', jsonResponse.token)
-
-                        toast.success(jsonResponse.message)
-
-                        setTimeout(() => {
-                            router.push({
-                                pathname: '/', query: {
-                                    name: jsonResponse.avtar
-                                }
-                            });
-                        }, 6000)
-
+                    if (sendEmailResponse.response) {
+                        localStorage.setItem("userDetails", JSON.stringify(userDetails))
+                        router.push({pathname : '/userEmailVerification',query : {
+                            response : true
+                        }})
                     } else {
-
-                        toast.error(jsonResponse.message);
-
+                        toast.error(sendEmailResponse.message)
                     }
-
                 } catch (err) {
-                    console.log(err)
+                    console.log(err);
                 }
             }
         }
@@ -216,7 +202,7 @@ const login = () => {
                                                         </div>
                                                         <Input name="phoneNumber" className=" font-semibold text-black" value={text} />
                                                         <div className="flex flex-col space-y-2">
-                                                            <Input type="email"  placeholder="Enter the Email" name="email" onChange={getText} />
+                                                            <Input type="email" placeholder="Enter the Email" name="email" onChange={getText} />
                                                             <p className="text-red-500 text-xs h-2">{emailValidation}</p>
                                                         </div>
                                                     </>

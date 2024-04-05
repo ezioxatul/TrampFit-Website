@@ -24,6 +24,7 @@ import Link from "next/link";
 
 export default function browseGym() {
     let choosePlan = ['1278.72', '2046.72', '5118.72']
+    
     let cityNameFirstColumn = ['Delhi', 'Bengaluru', 'Gurugram', 'Noida',
         'Chandigarh', 'Chennai', 'Gaziabad', 'Vadadara', 'Udaipur', 'Shimla',
         'Riapur', 'Madurai', 'Ludhiana', 'Kanpur', 'Guwahati', 'Dehradun',
@@ -42,6 +43,7 @@ export default function browseGym() {
     let [open, setOpen] = useState(false);
     let [cityName, setCityName] = useState();
     let [payableAmount, setPayableAmount] = useState("1278.72");
+
     let [firstStyle,setFirstStyle] = useState({
         bgColor:"bg-green-600",
         textColor:"text-white",
