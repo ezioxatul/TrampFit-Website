@@ -1,7 +1,7 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -22,21 +22,41 @@ import {
 } from "@/components/ui/select";
 
 const partnerLogin = () => {
+  let [title, setTitle] = useState("Partner Login");
   let [buttonText, setButtonText] = useState("Send OTP");
   let [inputTextController, setInputTextController] = useState(false);
   let [descriptionText, setDescriptionText] = useState();
   let [numberDisplay, setNumberDisplay] = useState();
+  let [otp, setOtp] = useState();
+  let [partnerDetails, setPartnerDetails] = useState(false);
 
-  const sendOTP = () => {
-    setButtonText("Submit OTP");
-    setDescriptionText(numberDisplay);
-    setNumberDisplay("");
-    setInputTextController(true);
+  const sendOTP = (event) => {
+    if (buttonText === "Send OTP") {
+      event.preventDefault();
+      setButtonText("Submit OTP");
+      setDescriptionText(numberDisplay);
+      setNumberDisplay(" ");
+      setTitle("Enter OTP");
+      setInputTextController(true);
+      setOtp("");
+    } else if (buttonText === "Submit OTP") {
+      if (otp === "123456") {
+        toast.success("OTP Verified");
+        setInputTextController(false);
+        setNumberDisplay(descriptionText)
+        setDescriptionText("Enter your details");
+        setButtonText("Submit");
+        setTitle("Partner Details");
+        setPartnerDetails(true);
+      }
+    }
   };
 
   const getInputData = (event) => {
     if (event.target.name === "mobileNumber") {
       setNumberDisplay(event.target.value);
+    } else if (event.target.name === "OTP") {
+      setOtp(event.target.value);
     }
   };
 
@@ -45,13 +65,15 @@ const partnerLogin = () => {
       <div className="flex flex-col min-h-screen">
         <Navbar />
 
-        <Card className="w-[350px] mx-auto mb-10">
+        <Card className="w-[350px] mx-auto mb-16 mt-16">
           <CardHeader>
-            <CardTitle className="text-green-700">Partner Login</CardTitle>
+            <CardTitle className="text-green-700">{title}</CardTitle>
             <CardDescription>
-              {inputTextController
+              {descriptionText == null
+                ? "You will receive a text message to validate."
+                : inputTextController
                 ? "OTP sent to "
-                : "You will receive a text message to validate."}
+                : "Please Enter your Details"}
               <span className=" font-bold">
                 {inputTextController && descriptionText}
               </span>
@@ -61,23 +83,51 @@ const partnerLogin = () => {
             <form>
               <div className="grid w-full items-center gap-4">
                 <div className="flex flex-col space-y-1.5">
-                  {inputTextController ? (
-                    <Input
-                      className=""
-                      id="name"
-                      name="OTP"
-                      value=""
-                      placeholder="Enter the OTP"
-                    />
+                  {partnerDetails ? (
+                    <>
+                      <div className=" space-y-4">
+                        <Input
+                          className=""
+                          id="name"
+                          name="name"
+                          placeholder="Enter your Name"
+                        />
+                        <Input
+                          className=""
+                          id="name"
+                          name="mobileNumber"
+                          value={numberDisplay}
+                          placeholder="Enter Your Mobile Number"
+                        />
+                        <Input
+                          className=""
+                          id="email"
+                          name="email"
+                          placeholder="Enter your Email"
+                        />
+                      </div>
+                    </>
+                  ) : inputTextController ? (
+                    <>
+                      <Input
+                        className=""
+                        id="name"
+                        name="OTP"
+                        onChange={getInputData}
+                        value={otp}
+                        placeholder="Enter the OTP"
+                      />
+                    </>
                   ) : (
-                    <Input
-                      className=""
-                      id="name"
-                      name="mobileNumber"
-                      onChange={getInputData}
-                      value={numberDisplay}
-                      placeholder="Enter Your Mobile Number"
-                    />
+                    <>
+                      <Input
+                        className=""
+                        id="name"
+                        name="mobileNumber"
+                        onChange={getInputData}
+                        placeholder="Enter Your Mobile Number"
+                      />
+                    </>
                   )}
                 </div>
               </div>
