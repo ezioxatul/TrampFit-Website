@@ -13,13 +13,8 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { useRouter } from "next/router";
+
 
 const partnerLogin = () => {
   let [title, setTitle] = useState("Partner Login");
@@ -28,7 +23,27 @@ const partnerLogin = () => {
   let [descriptionText, setDescriptionText] = useState();
   let [numberDisplay, setNumberDisplay] = useState();
   let [otp, setOtp] = useState();
-  let [partnerDetails, setPartnerDetails] = useState(false);
+  let [partnerDetailsInput, setPartnerDetailsInput] = useState(false);
+
+  let [partnerDetails, setPartnerDetails] = useState({
+    name: "",
+    mobileNumber: "",
+    email: ""
+  });
+
+  const getInputData = (event) => {
+    if (event.target.name === "mobileNumber") {
+      setNumberDisplay(event.target.value);
+    } else if (event.target.name === "OTP") {
+      setOtp(event.target.value);
+    }
+    else if (event.target.name === "name") {
+      setPartnerDetails({ ...partnerDetails, name: event.target.value });
+    }
+    else if(event.target.name === "email"){
+      setPartnerDetails({ ...partnerDetails, email: event.target.value });
+    }
+  };
 
   const sendOTP = (event) => {
     if (buttonText === "Send OTP") {
@@ -41,24 +56,32 @@ const partnerLogin = () => {
       setOtp("");
     } else if (buttonText === "Submit OTP") {
       if (otp === "123456") {
-        toast.success("OTP Verified");
-        setInputTextController(false);
-        setNumberDisplay(descriptionText)
-        setDescriptionText("Enter your details");
-        setButtonText("Submit");
-        setTitle("Partner Details");
-        setPartnerDetails(true);
+
+        try{
+          const option = {
+            method: GET
+          };
+
+          const partnerExists = await fetch(`http://localhost:3000/partnerExists?mobileNumber=${numberDisplay}`, option);
+
+          const partnerExistResponse = await partnerExists.json();
+
+        }
+
+        // toast.success("OTP Verified");
+        // setInputTextController(false);
+        // setNumberDisplay(descriptionText)
+        // setDescriptionText("Enter your details");
+        // setButtonText("Submit");
+        // setTitle("Partner Details");
+        // setPartnerDetailsInput(true);
       }
     }
   };
 
-  const getInputData = (event) => {
-    if (event.target.name === "mobileNumber") {
-      setNumberDisplay(event.target.value);
-    } else if (event.target.name === "OTP") {
-      setOtp(event.target.value);
-    }
-  };
+  
+
+  let router = useRouter();
 
   return (
     <>
@@ -83,7 +106,7 @@ const partnerLogin = () => {
             <form>
               <div className="grid w-full items-center gap-4">
                 <div className="flex flex-col space-y-1.5">
-                  {partnerDetails ? (
+                  {partnerDetailsInput ? (
                     <>
                       <div className=" space-y-4">
                         <Input
@@ -94,7 +117,7 @@ const partnerLogin = () => {
                         />
                         <Input
                           className=""
-                          id="name"
+                          id="mobileNumber"
                           name="mobileNumber"
                           value={numberDisplay}
                           placeholder="Enter Your Mobile Number"
@@ -111,7 +134,7 @@ const partnerLogin = () => {
                     <>
                       <Input
                         className=""
-                        id="name"
+                        id="OTP"
                         name="OTP"
                         onChange={getInputData}
                         value={otp}
@@ -122,7 +145,7 @@ const partnerLogin = () => {
                     <>
                       <Input
                         className=""
-                        id="name"
+                        id="mobileNumber"
                         name="mobileNumber"
                         onChange={getInputData}
                         placeholder="Enter Your Mobile Number"

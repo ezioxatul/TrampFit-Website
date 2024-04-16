@@ -1,12 +1,13 @@
 const express = require('express')
 const bodyParser = require('body-parser');
 const pug = require('pug');
+require('dotenv').config();
 const userAuthenticateRouter = require('./Routes/userAuthenticationRoutes');
+const partnerAuthenticateRouter = require('./Routes/partnerAuthenticationRoutes');
 const userDashboardRouter = require('./Routes/userDashboardRoutes')
 const adminLoginRouter = require('./Routes/adminAuthentication');
 const adminDashboardRouter = require('./Routes/adminDashboardRoutes');
 
-const {port} = require('./private.json');
 const App = express()
 
 // setting template engine
@@ -25,11 +26,12 @@ App.use(bodyParser.urlencoded({ extended: false}))
 
 // Applying the Router
 App.use(userAuthenticateRouter);
+App.use(partnerAuthenticateRouter);
 App.use(userDashboardRouter);
 App.use(adminLoginRouter);
 App.use(adminDashboardRouter);
 
-App.listen(port,()=>{
-    console.log("local Server Started on Port "+port);
+App.listen(process.env.PORT,()=>{
+    console.log("local Server Started on Port "+process.env.PORT);
 })
 
