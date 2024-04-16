@@ -38,9 +38,11 @@ const userLoginController = async (req, res) => {
         })
 
     } catch (err) {
+        console.log(err)
 
         res.json({
             message: "SomeThing Went Wrong !!",
+            error : err,
             response: false
         })
 

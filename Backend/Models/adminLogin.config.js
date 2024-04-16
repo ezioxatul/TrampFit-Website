@@ -1,5 +1,6 @@
 const sequelize = require('../databaseConnection');
 const {DataTypes} = require('sequelize');
+
 const adminCredential = sequelize.define('adminCredential', {
     // Model attributes are defined here
     username : {

@@ -25,8 +25,11 @@ export default function UserTable(props) {
                     {
                         props.rowData.map((val) => {
                             return (
-                                val === 'View Detail' ? <TableCell className="text-green-600 hover:text-green-700">{val}</TableCell> :
-                                    <TableCell>{val}</TableCell>
+                                val === 'View Detail' ? <TableCell className="text-green-600 hover:text-green-700 cursor-pointer">{val}</TableCell> :
+                                val === 'Pending' ? <TableCell ><p className=" text-yellow-500 font-semibold">{val}</p></TableCell> :
+                                val === 'Approved' ? <TableCell><p className="text-green-600 font-semibold">{val}</p></TableCell> :
+                                val === 'Rejected' ? <TableCell><p className=" text-red-500 font-semibold">{val}</p></TableCell> :
+                                <TableCell>{val}</TableCell>
                             )
                         })
                     }
