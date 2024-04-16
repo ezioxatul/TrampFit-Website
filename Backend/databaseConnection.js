@@ -1,8 +1,7 @@
 const Sequelize = require('sequelize');
-const private = require('./private.json');
 
-const sequelize = new Sequelize('postgres', private.username,private.password, {
-    host: private.host,
+const sequelize = new Sequelize('postgres', process.env.db_username,process.env.db_password, {
+    host: process.env.db_host,
     dialect: 'postgres'
   });
 

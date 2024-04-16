@@ -1,11 +1,10 @@
-const {admin_secret_key} = require('../private.json');
 const generateToken = require('../helper/generateToken');
 
 const validAdminLoginController = (req,res) =>{
     try{
         let token = generateToken({
             adminUsername : req.user.username
-        },admin_secret_key);
+        },process.env.admin_secret_key);
 
         res.json({
             response : true,

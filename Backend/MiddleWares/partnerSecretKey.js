@@ -1,7 +1,7 @@
 
-const passingUserSecretKey = (req,res,next) =>{
+const passingPartnerSecretKey = (req,res,next) =>{
     try{
-        req.secretKey = process.env.user_secret_key;
+        req.secretKey = process.env.partner_secret_key;
         next();
     } catch (err) {
         res.json({
@@ -11,4 +11,4 @@ const passingUserSecretKey = (req,res,next) =>{
     }
 }
 
-module.exports = passingUserSecretKey;
+module.exports = passingPartnerSecretKey;

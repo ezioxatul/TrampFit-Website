@@ -1,7 +1,6 @@
 const signupModel = require('../Models/signUpModel');
 const generateToken = require('../helper/generateToken');
 const generateUserAvtar = require('../helper/generateUserAvtar');
-const { user_secret_key } = require('../private.json');
 const transporter = require('../helper/sendEmailVerification');
 const pug = require('pug');
 // inserting user Data Inside Database
@@ -27,7 +26,7 @@ const userLoginController = async (req, res) => {
         let token = generateToken({
             mobileNumber: data.mobileNumber,
             fullName: data.fullName
-        }, user_secret_key);
+        }, process.env.user_secret_key);
 
         fullName = generateUserAvtar(fullName);
 
@@ -96,7 +95,7 @@ const userExistsController = async (req, res) => {
             let token = generateToken({
                 fullName: fullName,
                 mobileNumber: mobileNumber
-            }, user_secret_key)
+            }, process.env.user_secret_key)
 
             fullName = generateUserAvtar(fullName);
 
