@@ -21,6 +21,7 @@ export default function deleteAccount() {
     let[changingButton,setChangingButton] = useState(false);
     let[otp,setOtp] = useState("");
     let[response,setResponse] = useState(false);
+    
     useEffect(()=>{
         let token = localStorage.getItem("token");
         setFullName(localStorage.getItem("fullName"))

@@ -7,6 +7,7 @@ const partnerAuthenticateRouter = require('./Routes/partnerAuthenticationRoutes'
 const userDashboardRouter = require('./Routes/userDashboardRoutes')
 const adminLoginRouter = require('./Routes/adminAuthentication');
 const adminDashboardRouter = require('./Routes/adminDashboardRoutes');
+const membershipRoutes = require('./Routes/membershipRoutes');
 
 const App = express()
 
@@ -30,6 +31,7 @@ App.use(partnerAuthenticateRouter);
 App.use(userDashboardRouter);
 App.use(adminLoginRouter);
 App.use(adminDashboardRouter);
+App.use(membershipRoutes);
 
 App.listen(process.env.PORT,()=>{
     console.log("local Server Started on Port "+process.env.PORT);
