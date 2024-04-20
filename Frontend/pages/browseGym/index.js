@@ -22,8 +22,15 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import Checkbox from '@mui/material/Checkbox';
 import Link from "next/link";
 
-export default function browseGym() {
-    let choosePlan = ['1278.72', '2046.72', '5118.72']
+export async function getStaticProps() {
+    const res = await fetch('http://localhost/getActiveMembership',{method : "GET"})
+    let information = await res.json()
+    let planDetail = information.data;
+    return { props: { planDetail } }
+}
+
+export default function browseGym({planDetail}) {
+   
     
     let cityNameFirstColumn = ['Delhi', 'Bengaluru', 'Gurugram', 'Noida',
         'Chandigarh', 'Chennai', 'Gaziabad', 'Vadadara', 'Udaipur', 'Shimla',
@@ -42,7 +49,7 @@ export default function browseGym() {
 
     let [open, setOpen] = useState(false);
     let [cityName, setCityName] = useState();
-    let [payableAmount, setPayableAmount] = useState("1278.72");
+    let [payableAmount, setPayableAmount] = useState(planDetail[0].amount);
 
     let [firstStyle,setFirstStyle] = useState({
         bgColor:"bg-green-600",
@@ -83,7 +90,7 @@ export default function browseGym() {
     }
 
     const selectFirstPlan = () => {
-        setPayableAmount(choosePlan[0]);
+        setPayableAmount(planDetail[0].amount);
 
         // changing the css of the clicked div
         firstStyle.bgColor = "bg-green-600"
@@ -111,7 +118,7 @@ export default function browseGym() {
 
     const selectSecondPlan = () => {
 
-        setPayableAmount(choosePlan[1]);
+        setPayableAmount(planDetail[1].amount);
 
         secondStyle.bgColor = "bg-green-600"
         secondStyle.textColor = "text-white"
@@ -138,7 +145,7 @@ export default function browseGym() {
 
     const selectThirdPlan = () => {
 
-        setPayableAmount(choosePlan[2]);
+        setPayableAmount(planDetail[2].amount);
 
         thirdStyle.bgColor = "bg-green-600"
         thirdStyle.textColor = "text-white"
@@ -221,7 +228,7 @@ export default function browseGym() {
                         </Popover>
 
 
-                        <Input type="text" placeholder={"Amenities"} className="text-black pt-1 pl-7 text-lg w-[30rem] h-11 rounded-3xl border-2 border-green-600 mr-8" onClick={handleAmenities} />
+                        <Input type="text" placeholder={"Amenities"} className="text-black pt-1 pl-7 text-lg w-[30rem] h-11 rounded-3xl border-2 border-green-600 mr-8"  onClick={handleAmenities} />
                         <ArrowDropDownIcon className="absolute ml-[42rem] mt-1.5 h-8 w-8 text-green-600" />
                         <Popover
                             open={openingPopover}
@@ -342,18 +349,18 @@ export default function browseGym() {
                             <h1 className="text-md ml-12 mt-5 text-gray-400">CHOOSE PLAN</h1>
                             <div className="flex ml-12 space-x-3 mt-5">
                                 {
-                                    choosePlan.map((val, i) => {
+                                    planDetail.map((val, i) => {
                                         return (
                                             i === 0 ?
                                                 <div className={ `w-36 h-16 border rounded-md border-green-600 ${firstStyle.bgColor} cursor-pointer`}  onClick={selectFirstPlan}>
-                                                    <p className={`text-sm mt-5 ${firstStyle.sideText} `}><CurrencyRupeeIcon className={`w-4 h-4 ${firstStyle.iconColor} mt-[-0.3rem]`} /><span className={`${firstStyle.textColor}`}>{val}</span>/ 1 Month</p>
+                                                    <p className={`text-sm mt-5 text-center ${firstStyle.sideText} `}><CurrencyRupeeIcon className={`w-4 h-4 ${firstStyle.iconColor} mt-[-0.3rem]`} /><span className={`${firstStyle.textColor}`}>{val.amount}</span>/ {val.validity}</p>
                                                 </div> :
                                                 i === 2 ?
                                                     <div className={` w-36 h-16 border rounded-md border-green-600 ${thirdStyle.bgColor} cursor-pointer`}  onClick={selectThirdPlan} >
-                                                        <p className={` text-sm mt-5 ${thirdStyle.sideText} `}><CurrencyRupeeIcon className={` w-4 h-4 ${thirdStyle.iconColor} mt-[-0.3rem]`} /><span className={`${thirdStyle.textColor}`}>{val}</span>/ 3 Month</p>
+                                                        <p className={` text-sm mt-5 text-center ${thirdStyle.sideText} `}><CurrencyRupeeIcon className={` w-4 h-4 ${thirdStyle.iconColor} mt-[-0.3rem]`} /><span className={`${thirdStyle.textColor}`}>{val.amount}</span>/ {val.validity}</p>
                                                     </div> :
                                                     <div className={`w-36 h-16 border rounded-md border-green-600 ${secondStyle.bgColor} cursor-pointer`}  onClick={selectSecondPlan}>
-                                                        <p className={`${secondStyle.sideText} text-sm mt-5`}><CurrencyRupeeIcon className={`w-4 h-4 ${secondStyle.iconColor} mt-[-0.3rem]`} /><span className={`${secondStyle.textColor}`}>{val}</span>/ 1 Month</p>
+                                                        <p className={`${secondStyle.sideText} text-sm text-center mt-5`}><CurrencyRupeeIcon className={`w-4 h-4 ${secondStyle.iconColor} mt-[-0.3rem]`} /><span className={`${secondStyle.textColor}`}>{val.amount}</span>/ {val.validity}</p>
                                                     </div>
                                         )
                                     })

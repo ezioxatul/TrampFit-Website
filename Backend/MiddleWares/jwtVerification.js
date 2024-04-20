@@ -1,5 +1,4 @@
 const jwt = require('jsonwebtoken');
-const {user_secret_key} = require('../private.json');
 
 const jwtVerification = (req,res,next) => {
     try{
