@@ -26,6 +26,7 @@ export default function manageMembership() {
     let [planId, setPlanId] = useState();
     let [deactivatedId, SetDeactivatedId] = useState();
     let [start, setStart] = useState(false);
+    let [viewPlanDetail, setViewPlanDetail] = useState(false);
 
     useEffect(() => {
         let token = localStorage.getItem("adminToken");
@@ -70,6 +71,13 @@ export default function manageMembership() {
         amount: "",
         validity: "",
         description: ""
+    });
+    let [viewDetail, setViewDetail] = useState({
+        name: "",
+        amount: "",
+        validity: "",
+        description: "",
+        status: ""
     });
 
     const openAddMembershipForm = () => {
@@ -223,6 +231,25 @@ export default function manageMembership() {
         }
     }
 
+
+    const handleViewDetail = (e) => {
+        let viewDetailArray = e.target.id.split("+");
+
+        viewDetail.name = viewDetailArray[0];
+        viewDetail.amount = viewDetailArray[1];
+        viewDetail.validity = viewDetailArray[2];
+        viewDetail.description = viewDetailArray[3];
+        viewDetail.status = viewDetailArray[4];
+
+        setViewDetail({ ...viewDetail });
+
+        setViewPlanDetail(true);
+    }
+
+    const handleCloseViewDetail = () => {
+        setViewPlanDetail(false);
+    }
+
     return (
         <>
             <div className=" flex">
@@ -232,7 +259,7 @@ export default function manageMembership() {
                         <h1 className="text-2xl text-green-600">Manage Membership</h1>
                         <Button className=" hover:bg-green-700 bg-green-600  mb-5" onClick={openAddMembershipForm}><AddIcon /> Add Membership</Button>
                         <Dialog open={addMembership}>
-                            <DialogTitle className=" text-green-600">Add Membership</DialogTitle>
+                            <DialogTitle className=" text-green-600">{updateForm ? "Update Membership" : "Add Membership"}</DialogTitle>
                             <DialogContent>
                                 <DialogContentText className=" mb-4 w-96">
                                     Enter the membership Details
@@ -280,10 +307,20 @@ export default function manageMembership() {
                                             <h1 className="text-sm text-gray-400 ml-4 mt-4">Validity : {info.validity}</h1>
                                             <div className=" flex justify-between ml-4 mr-4 mt-6">
                                                 <div className=" flex space-x-4">
-                                                    <p className=" cursor-pointer text-xs rounded-lg text-yellow-500 bg-yellow-100  p-2 w-20 text-center" id={`${info.id}+${info.membershipName}+${info.amount}+${info.validity}+${info.description}`} onClick={updatePlanHandler}>EDIT PLAN</p>
-                                                    <p className=" cursor-pointer text-xs rounded-lg text-red-600 bg-red-100 p-2 w-20 text-center" id={info.id} onClick={deactivatedPlanHandler}>DELETE</p>
+                                                    {
+                                                        info.status === "Active" ?
+                                                            <>
+                                                                <p className=" cursor-pointer text-xs rounded-lg text-yellow-500 bg-yellow-100  p-2 w-20 text-center" id={`${info.id}+${info.membershipName}+${info.amount}+${info.validity}+${info.description}`} onClick={updatePlanHandler}>EDIT PLAN</p>
+                                                                <p className=" cursor-pointer text-xs rounded-lg text-red-600 bg-red-100 p-2 w-20 text-center" id={info.id} onClick={deactivatedPlanHandler}>DELETE</p>
+                                                            </> :
+                                                            <>
+                                                                <p className=" cursor-pointer text-xs rounded-lg text-yellow-300 bg-yellow-50  p-2 w-20 text-center" >EDIT PLAN</p>
+                                                                <p className=" cursor-pointer text-xs rounded-lg text-red-200 bg-red-50 p-2 w-20 text-center">DELETE</p>
+                                                            </>
+                                                    }
+
                                                 </div>
-                                                <p className=" cursor-pointer text-xs rounded-lg text-green-600 border-green-600 border p-2">VIEW PLAN DETAILS</p>
+                                                <p className=" cursor-pointer text-xs rounded-lg text-green-600 border-green-600 border p-2" id={`${info.membershipName}+${info.amount}+${info.validity}+${info.description}+${info.status}`} onClick={handleViewDetail}>VIEW PLAN DETAILS</p>
                                             </div>
                                         </div>
                                     );
@@ -293,6 +330,37 @@ export default function manageMembership() {
                         }
                         <div className="mt-20"></div>
                         <Popup open={start} title={"Do you want to deactivated the plan?"} cancel="Cancel" logout="Remove" cancelEvent={handleCancel} logoutEvent={handleDeactivation} />
+                        {/* view Plan Detail */}
+
+                        <Dialog open={viewPlanDetail}>
+                            <DialogContent className="w-[35rem] h-72">
+                                <p className=" cursor-pointer hover:text-green-600 transition text-center mt-[-1rem] float-right mr-[-1rem]" onClick={handleCloseViewDetail}><CloseIcon /></p>
+                                <div className=" flex justify-between ml-4 mr-4 mt-4">
+                                    <p className="text-2xl text-green-600">{viewDetail.name}</p>
+                                    {
+                                        viewDetail.status === "Active" ?
+                                            <p className="text-sm text-green-600 bg-green-100  text-center w-20 pt-0.5 h-[1.7rem] rounded-lg mt-2">{viewDetail.status}</p>
+                                            :
+                                            <p className="text-sm text-red-600 bg-red-100  text-center w-24 pt-0.5 h-[1.7rem] rounded-lg">{viewDetail.status}</p>
+
+                                    }
+                                </div>
+                                <div className=" flex justify-between mr-5 space-x-2 mt-5">
+                                    <p className="ml-4 text-green-600">Amount</p>
+                                    <p className="ml-4 text-md text-gray-400"><CurrencyRupeeIcon className="text-sm mt-[-0.2rem]" />{viewDetail.amount} </p>
+                                </div>
+                                <div className=" flex justify-between mr-5 space-x-2 mt-5">
+                                    <p className="ml-4 text-green-600">Validity</p>
+                                    <p className="ml-4 text-md text-gray-400"> {viewDetail.validity}</p>
+                                </div>
+
+                                <div className=" space-y-2 mr-4 mt-4">
+                                    <p className="ml-4 text-green-600">Description</p>
+                                    <p className=" ml-4 text-gray-400">{viewDetail.description}</p>
+                                </div>
+
+                            </DialogContent>
+                        </Dialog>
                     </div>
                 </div>
                 <ToastContainer />
