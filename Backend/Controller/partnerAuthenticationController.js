@@ -16,6 +16,7 @@ const partnerLoginController = async (req, res) => {
             fullName: fullName,
             mobileNumber: mobileNumber,
             email: email,
+            status: "Pending"
         })
 
         let token = generateToken({

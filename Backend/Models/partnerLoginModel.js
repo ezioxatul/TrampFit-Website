@@ -15,7 +15,12 @@ const partnerLoginModel = sequelize.define('partnerLogin', {
         type: DataTypes.STRING,
         allowNull: false,
         required:true
-        }
+        },
+        status: {
+          type: DataTypes.STRING,
+          allowNull: false,
+          required:true
+          }
     },{
         freezeTableName : true
       },
