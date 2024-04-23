@@ -1,6 +1,6 @@
 const partnerLoginModel = require ('../Models/partnerLoginModel');
-require('dotenv').config();
 const generateToken = require('../helper/generateToken');
+const transporter = require('../helper/sendEmailVerification');
 const pug = require('pug');
 
 const partnerLoginController = async (req, res) => {
@@ -12,7 +12,7 @@ const partnerLoginController = async (req, res) => {
 
         console.log(req.body)
 
-        let data = await signupModel.create({
+        let data = await partnerLoginModel.create({
             fullName: fullName,
             mobileNumber: mobileNumber,
             email: email,
@@ -61,14 +61,36 @@ const tokenAuthenticationController = (req, res) => {
 }
 
 
-// const emailVerificationController = async (req, res) => {
-//     try {
-//         const receiverEmail = req.query.email;
-//         let htmlContent = pug.renderFile('emailTemplate/partnerEmailVerification.pug');
+const partnerEmailVerificationController = async (req, res) => {
+    try {
+        const receiverEmail = req.query.email;
+        let htmlContent = pug.renderFile('emailTemplate/partnerEmailVerification.pug');
 
-//         const info = await 
-//     }
-// }
+        const info = await transporter.sendMail({
+            from: '"TrampFit" <trampfit180@gmail.com',
+            to: receiverEmail,
+            subject: "Email Verification",
+            html: htmlContent
+    })
+        if(info){
+            res.json({
+                response: true,
+                message: "Email send successfully"
+            })
+        }else{
+            res.json({
+                response: false,
+                message: "Email has not been send"
+            })
+        };
+    }catch(err){
+        res.json({
+            response: false,
+            message: "Something went wrong"
+        })
+    }
+    
+}
 
 
 
@@ -119,6 +141,7 @@ const partnerExistsController = async (req, res) => {
 
 module.exports = {
     partnerLoginController: partnerLoginController,
+    partnerEmailVerificationController: partnerEmailVerificationController,
     tokenAuthenticationController: tokenAuthenticationController,
     partnerExistsController: partnerExistsController
 }
