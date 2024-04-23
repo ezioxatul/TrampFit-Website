@@ -15,7 +15,6 @@ import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { useRouter } from "next/router";
 
-
 const partnerLogin = () => {
   let [title, setTitle] = useState("Partner Login");
   let [buttonText, setButtonText] = useState("Send OTP");
@@ -26,9 +25,9 @@ const partnerLogin = () => {
   let [partnerDetailsInput, setPartnerDetailsInput] = useState(false);
 
   let [partnerDetails, setPartnerDetails] = useState({
-    name: "",
+    fullName: "",
     mobileNumber: "",
-    email: ""
+    email: "",
   });
 
   const getInputData = (event) => {
@@ -36,50 +35,91 @@ const partnerLogin = () => {
       setNumberDisplay(event.target.value);
     } else if (event.target.name === "OTP") {
       setOtp(event.target.value);
-    }
-    else if (event.target.name === "name") {
-      setPartnerDetails({ ...partnerDetails, name: event.target.value });
-    }
-    else if(event.target.name === "email"){
-      setPartnerDetails({ ...partnerDetails, email: event.target.value });
+    } else if (event.target.name === "name") {
+      partnerDetails.fullName = event.target.value;
+      setPartnerDetails({ ...partnerDetails });
+    } else if (event.target.name === "email") {
+      partnerDetails.email = event.target.value;
+      setPartnerDetails({ ...partnerDetails });
     }
   };
 
-  const sendOTP = (event) => {
+  const sendOTP = async (event) => {
     if (buttonText === "Send OTP") {
       event.preventDefault();
       setButtonText("Submit OTP");
       setDescriptionText(numberDisplay);
+      console.log(numberDisplay);
       setNumberDisplay(" ");
       setTitle("Enter OTP");
       setInputTextController(true);
       setOtp("");
     } else if (buttonText === "Submit OTP") {
       if (otp === "123456") {
-
-        try{
+        try {
           const option = {
-            method: GET
+            method: "GET",
           };
 
-          const partnerExists = await fetch(`http://localhost:3000/partnerExists?mobileNumber=${numberDisplay}`, option);
+          const partnerExists = await fetch(
+            `http://localhost/partnerExists?mobileNumber=${descriptionText}`,
+            option
+          );
 
           const partnerExistResponse = await partnerExists.json();
 
+          if (partnerExistResponse.response) {
+            localStorage.setItem("partnerToken", partnerExistResponse.token);
+            toast.success("Signed In Successfully");
+            router.push("/partner/partnerdashboard");
+          } else {
+            toast.success("OTP Verified");
+            setInputTextController(false);
+            setNumberDisplay(descriptionText);
+            setDescriptionText("Enter your details");
+            setButtonText("Submit");
+            setTitle("Partner Details");
+            setPartnerDetailsInput(true);
+          }
+        } catch (err) {
+          console.log(err);
         }
-
-        // toast.success("OTP Verified");
-        // setInputTextController(false);
-        // setNumberDisplay(descriptionText)
-        // setDescriptionText("Enter your details");
-        // setButtonText("Submit");
-        // setTitle("Partner Details");
-        // setPartnerDetailsInput(true);
+      } else {
+        toast.error("Invalid OTP");
       }
+    } else {
+      partnerDetails.mobileNumber = numberDisplay;
+      setPartnerDetails({ ...partnerDetails });
+      console.log(partnerDetails);
+
+      try {
+        const option = {
+          method: "GET",
+        };
+
+        const emailExists = await fetch(
+          `http://localhost/partnerEmailVerification?email=${partnerDetails.email}`,
+          option
+        );
+        const emailExistsResponse = await emailExists.json();
+
+        if (emailExistsResponse.response) {
+          localStorage.setItem(
+            "partnerDetails",
+            JSON.stringify(partnerDetails)
+          );
+          router.push({
+            pathname: "/partner/partnerEmailVerification",
+            query: {
+              response: true,
+            },
+          });
+        } else {
+          toast.error(emailExistsResponse.message);
+        }
+      } catch {}
     }
   };
-
-  
 
   let router = useRouter();
 
@@ -113,6 +153,7 @@ const partnerLogin = () => {
                           className=""
                           id="name"
                           name="name"
+                          onChange={getInputData}
                           placeholder="Enter your Name"
                         />
                         <Input
@@ -126,6 +167,7 @@ const partnerLogin = () => {
                           className=""
                           id="email"
                           name="email"
+                          onChange={getInputData}
                           placeholder="Enter your Email"
                         />
                       </div>
