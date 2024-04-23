@@ -4,10 +4,48 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import SortIcon from '@mui/icons-material/Sort';
 import UserTable from "@/components/UserTable";
+import { useEffect, useState } from "react";
+
 export default function User() {
+    let [userInfo, setUserInfo] = useState([]);
+
+    useEffect(() => {
+        try {
+            let token = localStorage.getItem("adminToken");
+
+            const option = {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                }
+            }
+
+            fetch('http://localhost/adminDasboard/getUserInfo', option).then(async (res) => {
+
+                let userInfo = await res.json();
+
+                let newUserData = [];
+
+                userInfo.data.map((val) => {
+                    let userData = Object.values(val);
+                    userData.push('View Detail');
+                    newUserData.push(userData);
+                })
+
+                setUserInfo(newUserData);
+
+            }).catch((err) => {
+                console.log(err);
+            })
+
+        } catch (err) {
+            console.log(err);
+        }
+
+    }, []);
 
     let columnName = ['User ID', 'Name', 'City', 'Mobile Number', 'Email'];
-    let rowData = ['1', 'Aadrash', 'Jalandhar', '9876860219', 'sharmaadarsh180@gmail.com', 'View Detail'];
+    
     return (
         <>
             <div className=" flex">
@@ -22,7 +60,7 @@ export default function User() {
                         <Button className=" w-20 h-11 flex justify-around hover:bg-green-700  bg-green-600  p-2 "><SortIcon className="" />  Sort</Button>
                     </div>
                     <div className="border-2 rounded-xl ml-20">
-                        <UserTable columnName={columnName} rowData={rowData} />
+                        <UserTable columnName={columnName} rowData={userInfo} />
                     </div>
                 </div>
             </div>

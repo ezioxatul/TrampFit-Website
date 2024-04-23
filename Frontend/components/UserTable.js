@@ -21,19 +21,29 @@ export default function UserTable(props) {
                 </TableRow>
             </TableHeader>
             <TableBody>
-                <TableRow>
-                    {
-                        props.rowData.map((val) => {
-                            return (
-                                val === 'View Detail' ? <TableCell className="text-green-600 hover:text-green-700 cursor-pointer">{val}</TableCell> :
-                                val === 'Pending' ? <TableCell ><p className=" text-yellow-500 font-semibold">{val}</p></TableCell> :
-                                val === 'Approved' ? <TableCell><p className="text-green-600 font-semibold">{val}</p></TableCell> :
-                                val === 'Rejected' ? <TableCell><p className=" text-red-500 font-semibold">{val}</p></TableCell> :
-                                <TableCell>{val}</TableCell>
-                            )
-                        })
-                    }
-                </TableRow>
+                {
+                    props.rowData.map((Info) => {
+                        return (
+                            <>
+                                <TableRow>
+                                    {
+                                        
+                                        Info.map((val) => {
+                                            return (
+                                                val === 'View Detail' ? <TableCell className="text-green-600 hover:text-green-700 cursor-pointer">{val}</TableCell> :
+                                                    val === 'Pending' ? <TableCell ><p className=" text-yellow-500 font-semibold">{val}</p></TableCell> :
+                                                        val === 'Approved' ? <TableCell><p className="text-green-600 font-semibold">{val}</p></TableCell> :
+                                                            val === 'Rejected' ? <TableCell><p className=" text-red-500 font-semibold">{val}</p></TableCell> :
+                                                                <TableCell>{val}</TableCell>
+                                            )
+                                        })
+                                    }
+                                </TableRow>
+                            </>
+                        );
+                    })
+                }
+
             </TableBody>
         </Table>
     );

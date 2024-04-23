@@ -17,7 +17,7 @@ export default function Membership() {
     },[])
  
     let columnName = ["Membership ID", "Membership Type", "Amount", "Start From", "Valid To", "Status",""];
-    let rowData = ["#123456", "Basic Plan", "2099.00", "20-12-2023", "1-4-2024", "Active","View Detail"];
+    let rowData = [["#123456", "Basic Plan", "2099.00", "20-12-2023", "1-4-2024", "Active","View Detail"]];
     return (
         <>
             <div className="flex flex-col min-h-screen">

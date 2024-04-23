@@ -16,11 +16,11 @@ import { Button } from "@/components/ui/button";
 export default function userId() {
     // session table Data
     let sessionColumnName = ["Session ID", "Gym Name", "City", "Session Timing", "Date", ""];
-    let sessionRowInfo = ["#123456", "Atul Fitness Club", "Pathankot", "6PM - 8PM", "1-4-2024", "View Detail"];
+    let sessionRowInfo = [["#123456", "Atul Fitness Club", "Pathankot", "6PM - 8PM", "1-4-2024", "View Detail"]];
 
     // membership Table Data
     let membershipColumnName = ["Membership ID", "Membership Type", "Amount", "Start From", "Valid To", "Status", ""];
-    let membershipRowInfo = ["#123456", "Basic Plan", "2099.00", "20-12-2023", "1-4-2024", "Active", "View Detail"];
+    let membershipRowInfo = [["#123456", "Basic Plan", "2099.00", "20-12-2023", "1-4-2024", "Active", "View Detail"]];
 
     // toggle switch state
     let [switchUserDetails, setSwitchUserDetails] = useState(false);
