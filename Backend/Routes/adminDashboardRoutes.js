@@ -9,10 +9,21 @@ const router = express.Router();
 
 router.get('/adminDashboard',adminSecretKey,jwtVerification,adminDashboardController.adminTokenCheckController);
 
+// adminDashboard -> Users
+
+// 1. get all Users Information
+router.get('/adminDasboard/getUserInfo',adminSecretKey,jwtVerification,adminDashboardController.getUserInfoController);
+
+
+// adminDashboard -> Partners
+
+// 1. get all partners information
+router.get('/adminDashboard/getPartnersInfo',adminSecretKey,jwtVerification,adminDashboardController.getPartnerInfoController);
+
+//adminDashboard ->  manage Membership
+
+// token check
 router.get('/adminDashboard/manageMembership',adminSecretKey,jwtVerification,adminDashboardController.adminTokenCheckController);
-
-
-// manage Membership
 
 // 1. add Membership
 router.post('/adminDashboard/manageMembership/addMembership',adminSecretKey,jwtVerification,membershipLimitCheck,adminDashboardController.addMembershipController);

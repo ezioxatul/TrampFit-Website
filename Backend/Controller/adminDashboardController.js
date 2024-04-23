@@ -1,5 +1,7 @@
 const { response } = require("express");
 const membershipDetailsModel = require('../Models/membershipModel.config');
+const userSignupModel = require('../Models/signUpModel');
+const partnerLoginModel = require('../Models/partnerLoginModel');
 const { where } = require("sequelize");
 const sequelize = require("../databaseConnection");
 
@@ -59,7 +61,7 @@ const getAllMembershipDetailsController = async (req, res) => {
 
         let membershipDetails = await membershipDetailsModel.findAll({
             attributes: ['membershipName', 'amount', 'validity', 'description', 'status', 'id'],
-            order : sequelize.col('id')
+            order: sequelize.col('id')
         });
 
         if (membershipDetails) {
@@ -131,41 +133,21 @@ const updateMembershipController = async (req, res) => {
 const deleteMembershipController = async (req, res) => {
 
     try {
-
         let id = req.query.id;
 
-        let getStatus = await membershipDetailsModel.findOne({
-            attributes: ['status'],
-            where: {
-                id: id
-            }
-        });
-
-        if (getStatus.status === 'Active') {
-
-            await membershipDetailsModel.update(
-                { status: 'Deactivated' },
-                {
-                    where: {
-                        id: id
-                    }
+        await membershipDetailsModel.update(
+            { status: 'Deactivated' },
+            {
+                where: {
+                    id: id
                 }
-            )
+            }
+        )
 
-            res.json({
-                message : "The plan is No more Active",
-                response : true
-            }) 
-
-        } else {
-
-            res.json({
-                message : "The Plan is already Deactivated",
-                response : false
-            })
-
-        }
-
+        res.json({
+            message: "The plan is No more Active",
+            response: true
+        })
     } catch (err) {
         console.log(err)
 
@@ -175,13 +157,64 @@ const deleteMembershipController = async (req, res) => {
         })
 
     }
-
 }
+
+// display user information on the admin Portal
+const getUserInfoController = async(req,res) =>{
+    try {
+        let userInfo = await userSignupModel.findAll({
+            attributes : ['id','fullName','city','mobileNumber','email'],
+            order : sequelize.col('id')
+        })
+
+        res.json({
+            message : "User Information",
+            response : true,
+            data : userInfo
+        })
+
+    } catch(err) {
+        console.log(err);
+
+        res.json({
+            message : "Something went wrong !!",
+            response : false
+        })
+    }
+}
+
+
+// display partners information on the admin portal
+const getPartnerInfoController = async (req, res) => {
+    try {
+        let partnerInfo = await partnerLoginModel.findAll({
+            attributes: ['id','fullName', 'mobileNumber', 'email', 'status'],
+            order: sequelize.col('id')
+        })
+
+        res.json({
+            message: "Partner Information",
+            response: true,
+            data : partnerInfo
+        })
+
+    } catch (err) {
+        console.log(err);
+
+        res.json({
+            message: "Something went wrong !!",
+            response: false
+        });
+    }
+}
+
 
 module.exports = {
     adminTokenCheckController,
     addMembershipController,
     getAllMembershipDetailsController,
     updateMembershipController,
-    deleteMembershipController
+    deleteMembershipController,
+    getPartnerInfoController,
+    getUserInfoController
 }

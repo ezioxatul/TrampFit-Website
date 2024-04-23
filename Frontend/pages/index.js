@@ -80,7 +80,7 @@ export default function Home() {
         </div>
         <div className="hero mr-4">
           <Image
-            src="/benefits.gif" // Path to your image
+            src="/hero-image.gif" // Path to your image
             alt="Description of the image" // Description of the image for accessibility
             width={400} // Reduced width of the image
             height={250} // Reduced height of the image

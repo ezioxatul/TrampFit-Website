@@ -16,7 +16,7 @@ export default function Session() {
         setFullName(localStorage.getItem("fullName"));
     },[])
     let columnName = ["Session ID","Gym Name","City","Session Timing","Date",""];
-    let rowData = ["#123456","Atul Fitness Club","Pathankot","6PM - 8PM","1-4-2024","View Detail"];
+    let rowData = [["#123456","Atul Fitness Club","Pathankot","6PM - 8PM","1-4-2024","View Detail"]];
     return (
         <>
             <div className="flex flex-col min-h-screen">
