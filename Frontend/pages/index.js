@@ -2,43 +2,8 @@ import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import { useEffect, useState } from "react";
 
 export default function Home() {
-  let [response, setResponse] = useState(false);
-  let [avtar, setAvtar] = useState();
-
-  useEffect(() => {
-    try {
-      let token = localStorage.getItem("token");
-      if (token) {
-        const option = {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        };
-
-        fetch("http://localhost/", option)
-          .then(async (response) => {
-            let tokenChecker = await response.json();
-            if (tokenChecker.response) {
-              setResponse(true);
-              setAvtar(tokenChecker.avtar);
-            } else {
-              setResponse(false);
-            }
-          })
-          .catch((err) => {
-            console.log(err);
-          });
-      } else {
-        setResponse(false);
-      }
-    } catch (err) {
-      console.log(err);
-    }
-  });
 
   let benefits = [
     {
@@ -63,7 +28,7 @@ export default function Home() {
   ];
   return (
     <>
-      <Navbar response={response} avtar={avtar} />
+      <Navbar/>
 
       {/* home section */}
       <div className="flex justify-between">

@@ -14,11 +14,21 @@ router.get('/adminDashboard',adminSecretKey,jwtVerification,adminDashboardContro
 // 1. get all Users Information
 router.get('/adminDasboard/getUserInfo',adminSecretKey,jwtVerification,adminDashboardController.getUserInfoController);
 
+// 2. Search the user
+router.get('/adminDashboard/searchUser',adminDashboardController.searchUserController);
+
 
 // adminDashboard -> Partners
 
 // 1. get all partners information
 router.get('/adminDashboard/getPartnersInfo',adminSecretKey,jwtVerification,adminDashboardController.getPartnerInfoController);
+
+// 2. searching the partner
+router.get('/adminDashboard/searchPartner',adminDashboardController.searchPartnerController);
+
+// 3. apply filter on partners Data
+
+router.get('/adminDashboard/filterPartner',adminDashboardController.filterPartnerController);
 
 //adminDashboard ->  manage Membership
 

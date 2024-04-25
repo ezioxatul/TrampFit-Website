@@ -96,7 +96,7 @@ export default function deleteAccount() {
     return (
         <>
             <div className="flex flex-col min-h-screen">
-                <Navbar response={response}/>
+                <Navbar/>
                 <div className=" flex">
                     <UserSideBar mobileNumber={phoneNumber} profileName={fullName}/>
                     <div className=" mb-10">

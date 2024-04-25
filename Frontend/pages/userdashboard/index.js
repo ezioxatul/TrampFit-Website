@@ -59,7 +59,7 @@ export default function UserDashboard() {
     return (
         <>
             <div className="flex flex-col min-h-screen">
-                <Navbar response={response}/>
+                <Navbar/>
                 <div className=" flex">
                     <UserSideBar mobileNumber={personalInfo.mobileNumber} profileName={personalInfo.name}/>
                     <div className=" mx-auto mt-12">

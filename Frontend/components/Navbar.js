@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
@@ -20,7 +20,43 @@ import 'react-toastify/dist/ReactToastify.css';
 const pages = ['Browse Gym', 'Membership', 'Partner Login', 'User Login'];
 const settings = ['Dashboard', 'Logout'];
 
-function Navbar(props) {
+function Navbar() {
+  let [response, setResponse] = useState(false);
+
+  useEffect(() => {
+    let token = localStorage.getItem("token");
+
+    if (token) {
+      try {
+        const option = {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+
+        fetch("http://localhost/tokenCheck", option).then(async (res) => {
+
+          let tokenCheck = await res.json();
+          if(tokenCheck.response) {
+            setResponse(true);
+          } else {
+            setResponse(false);
+          }
+
+        }).catch((err) => {
+          console.log(err);
+        })
+
+      } catch (err) {
+        console.log(err);
+      }
+    } else {
+      setResponse(false);
+    }
+
+  }, [])
+
   const [anchorElNav, setAnchorElNav] = useState(null);
   const [anchorElUser, setAnchorElUser] = useState(null);
   const [open, setOpen] = useState();
@@ -54,6 +90,7 @@ function Navbar(props) {
     localStorage.removeItem("token");
     setOpen(false)
     router.push('/');
+    setResponse(false);
   }
 
   const userDashboard = async () => {
@@ -71,10 +108,10 @@ function Navbar(props) {
       const authCheckResponse = await authCheck.json();
 
       if (authCheckResponse.response) {
-        setTimeout(()=>{
+        setTimeout(() => {
           router.push('/userdashboard');
-        },1000);
-        
+        }, 1000);
+
       } else {
         localStorage.removeItem("token");
         toast.error(authCheckResponse.message);
@@ -143,13 +180,15 @@ function Navbar(props) {
           <AdbIcon sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }} />
           <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' }, justifyContent: 'center' }}>
             {pages.map((page) => (
-              <Link
+              page === 'User Login' && response ?
+               "" :
+               <Link
                 onClick={handleCloseNavMenu}
                 href={
                   page === 'User Login' ? '/login' :
-                  page === 'Browse Gym' ? '/browseGym':
-                    page === 'Partner Login' ? '/partner/partnerLogin' :
-                      `/${page.toLowerCase()}`
+                    page === 'Browse Gym' ? '/browseGym' :
+                      page === 'Partner Login' ? '/partner/partnerLogin' :
+                        `/${page.toLowerCase()}`
                 }
                 key={page}
                 sx={{ color: 'grey', display: 'block', mt: 2 }}
@@ -157,7 +196,8 @@ function Navbar(props) {
                 transition ease-in-out delay-3'
               >
                 {page}
-              </Link>
+              </Link> 
+              
             ))}
           </Box>
 
@@ -165,7 +205,7 @@ function Navbar(props) {
             <Tooltip title="Open settings">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0, mt: 2 }} >
                 {
-                  props.response && <Avatar src='/avtar.png'></Avatar>
+                  response && <Avatar src='/avtar.png'></Avatar>
                 }
 
               </IconButton>
