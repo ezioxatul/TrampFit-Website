@@ -27,7 +27,6 @@ export default function UserTable(props) {
                             <>
                                 <TableRow>
                                     {
-                                        
                                         Info.map((val) => {
                                             return (
                                                 val === 'View Detail' ? <TableCell className="text-green-600 hover:text-green-700 cursor-pointer">{val}</TableCell> :
