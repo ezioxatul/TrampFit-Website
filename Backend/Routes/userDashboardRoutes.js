@@ -17,5 +17,10 @@ router.get('/tokenCheck',userSecretKey,jwtVerification,userDashboardController.t
 // deleting the User Details From the DataBase
 router.delete('/deleteUserDetails',userSecretKey,jwtVerification,userDashboardController.deleteUserInfoController)
 
+// get membershipInfo of the user from the Database
+router.get('/getMembershipDetails',userSecretKey,jwtVerification,userDashboardController.getMembershipDetailController);
+
+// get the active membership If Yes
+router.get('/getActiveMembershipDetails',userSecretKey,jwtVerification,userDashboardController.getActiveMembershipController);
 
 module.exports = router;

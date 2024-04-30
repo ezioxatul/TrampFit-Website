@@ -18,7 +18,12 @@ const membershipDetails = sequelize.define('membershipDetails', {
         type : DataTypes.STRING,
         required : true,
         allowNull : false
-    } , 
+    } ,
+    session : {
+        type : DataTypes.INTEGER,
+        required : true,
+        allowNull : false
+    } ,
 
     description : {
         type : DataTypes.STRING,

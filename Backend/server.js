@@ -8,8 +8,12 @@ const userDashboardRouter = require('./Routes/userDashboardRoutes')
 const adminLoginRouter = require('./Routes/adminAuthentication');
 const adminDashboardRouter = require('./Routes/adminDashboardRoutes');
 const membershipRoutes = require('./Routes/membershipRoutes');
+const sequelizeAssociations = require('./sequelizeAssociations')();
 
 const App = express()
+
+
+// notifyUserEndingSubscription(date,'sub_1PApiCSHakBeEW1YHtqNE6Eb','2','sharmaadarsh180@gmail.com');
 
 // setting template engine
 App.set("view engine","pug")
@@ -22,6 +26,7 @@ App.use((req,res,next)=>{
     next();
 })
 
+App.use('/handleWebhooks', express.raw({ type: 'application/json' }));
 App.use(bodyParser.json());
 App.use(bodyParser.urlencoded({ extended: false}))
 

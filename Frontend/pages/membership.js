@@ -6,6 +6,10 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import CurrencyRupeeIcon from '@mui/icons-material/CurrencyRupee';
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { loadStripe } from '@stripe/stripe-js';
+import Popup from "@/components/Popup";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export async function getStaticProps() {
     const res = await fetch('http://localhost/getActiveMembership')
@@ -15,19 +19,107 @@ export async function getStaticProps() {
 }
 
 export default function membership({ information }) {
+
+    let [start, setStart] = useState(false);
+    let [nextStart, setNextStart] = useState(false);
+
+    let [subscriptionId, setSubscriptionId] = useState();
+
     let [membershipPlan, setMembershipPlan] = useState(information[0].membershipName);
 
     let [payableAmount, setPayableAmount] = useState(information[0].amount);
     let [selectPlanValidity, setSelectPlanValidity] = useState(information[0].validity);
+    let [planDescription, setPlanDescription] = useState(information[0].description);
+    let [membershipId, setMembershipId] = useState(information[0].id);
 
     const handlePlan = (e) => {
 
         setMembershipPlan(e.target.value);
         setPayableAmount(information[e.target.id].amount);
         setSelectPlanValidity(information[e.target.id].validity);
-        
+        setPlanDescription(information[e.target.id].description);
+        setMembershipId(information[e.target.id].id);
     }
 
+    const handlePayment = async () => {
+        setNextStart(false);
+        const stripePromise = await loadStripe(process.env.payment_gateway_publish_key);
+
+        const bodyObject = {
+            membershipPlan: membershipPlan,
+            payableAmount: payableAmount,
+            selectPlanValidity: selectPlanValidity,
+            planDescription: planDescription,
+            membershipId: membershipId
+        }
+
+        try {
+            let token = localStorage.getItem("token");
+
+            const option = {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify(bodyObject)
+            }
+
+            let paymentResponse = await fetch('http://localhost/createSubscription', option);
+            paymentResponse = await paymentResponse.json();
+
+            if (paymentResponse.response) {
+
+                if (paymentResponse.sessionId) {
+
+                    stripePromise.redirectToCheckout({
+                        sessionId: paymentResponse.sessionId,
+                    });
+
+                } else {
+
+                    setStart(true);
+                    setSubscriptionId(paymentResponse.subscriptionId);
+                }
+            }
+
+        } catch (err) {
+            console.log(err);
+        }
+    }
+
+    const handleClose = () => {
+        setStart(false);
+    }
+
+    const handleDelete = async () => {
+        try {
+            const option = {
+                method: "DELETE"
+            }
+            let response = await fetch(`http://localhost/cancelSubscription?subscriptionId=${subscriptionId}`, option);
+            response = await response.json();
+
+            if (response.response) {
+                setStart(false);
+                toast.success("Plan has no more Exists");
+            } else {
+                toast.error("Something Went wrong !!");
+            }
+
+        } catch (err) {
+            console.log(err);
+        }
+    }
+
+
+    const confirmation = ()=> {
+        setNextStart(true);
+    }
+
+    const notConfirmed = () =>{
+        setNextStart(false);
+    }
 
     return (
         <>
@@ -72,7 +164,7 @@ export default function membership({ information }) {
                             <p className=" text-lg text-green-600">Payable Amount</p>
                             <p className="font-bold"><CurrencyRupeeIcon className="text-sm mt-[-0.2rem]" />{payableAmount}</p>
                         </div>
-                        <Button className="text-lg hover:bg-green-700 bg-green-600 w-[25rem] mb-5 mt-8 ml-6"> Pay <span><CurrencyRupeeIcon className="text-sm mt-[-0.2rem]" /></span>{payableAmount}</Button>
+                        <Button className="text-lg hover:bg-green-700 bg-green-600 w-[25rem] mb-5 mt-8 ml-6" onClick={confirmation}> Pay <span><CurrencyRupeeIcon className="text-sm mt-[-0.2rem]" /></span>{payableAmount}</Button>
                     </div>
                 </div>
                 <div className=" border w-[60rem] h-60 ml-10 mb-10">
@@ -85,6 +177,9 @@ export default function membership({ information }) {
                         <li>Unlimited workout reservations across all the network</li>
                     </ul>
                 </div>
+                <Popup open={nextStart} title={"Recurring payment Confirmation"} cancel="No" logout="Yes" logoutEvent={handlePayment} cancelEvent={notConfirmed} />
+                <Popup open={start} contentItem={"Subscription Already exists"} title={"Do you want to cancel the subscription?"} cancel="close" logout="Delete" logoutEvent={handleDelete} cancelEvent={handleClose} />
+                {/* <ToastContainer /> */}
                 <Footer />
             </div>
         </>
