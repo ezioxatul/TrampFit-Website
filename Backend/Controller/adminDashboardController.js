@@ -27,12 +27,13 @@ const adminTokenCheckController = (req, res) => {
 const addMembershipController = async (req, res) => {
     try {
 
-        let { membershipName, amount, validity, description } = req.body;
+        let { membershipName, amount, validity, session ,description } = req.body;
 
         await membershipDetailsModel.create({
             membershipName,
             amount,
             validity,
+            session,
             description,
             status: "Active"
         })
@@ -98,13 +99,14 @@ const getAllMembershipDetailsController = async (req, res) => {
 const updateMembershipController = async (req, res) => {
     try {
         let id = req.query.id;
-        let { membershipName, amount, validity, description } = req.body;
+        let { membershipName, amount, validity,session, description } = req.body;
 
 
         await membershipDetailsModel.update({
             membershipName,
             amount,
             validity,
+            session,
             description
         }, {
             where: {

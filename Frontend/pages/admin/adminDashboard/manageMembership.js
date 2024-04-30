@@ -70,6 +70,7 @@ export default function manageMembership() {
         membershipName: "",
         amount: "",
         validity: "",
+        session: "",
         description: ""
     });
     let [viewDetail, setViewDetail] = useState({
@@ -86,6 +87,7 @@ export default function manageMembership() {
         addMembershipData.membershipName = ""
         addMembershipData.amount = ""
         addMembershipData.validity = ""
+        addMembershipData.session = ""
         addMembershipData.description = ""
         setAddMembershipData({ ...addMembershipData });
 
@@ -104,6 +106,8 @@ export default function manageMembership() {
             addMembershipData.amount = e.target.value;
         } else if (e.target.name === "validity") {
             addMembershipData.validity = e.target.value;
+        } else if (e.target.name === "session") {
+            addMembershipData.session = e.target.value;
         } else {
             addMembershipData.description = e.target.value;
         }
@@ -268,6 +272,7 @@ export default function manageMembership() {
                                     <Input placeHolder="Membership Name" name="membershipName" onChange={getValue} value={addMembershipData.membershipName} />
                                     <Input placeHolder="Membership Amount" name="amount" onChange={getValue} value={addMembershipData.amount} />
                                     <Input placeHolder="Membership Validity" name="validity" onChange={getValue} value={addMembershipData.validity} />
+                                    <Input placeHolder="Membership Session" name="session" onChange={getValue} value={addMembershipData.session} />
                                     <Textarea placeholder="Enter the Plan Description" className=" resize-none" name="description" onChange={getValue} value={addMembershipData.description} />
                                 </div>
                                 {/* <textarea placeHolder="Enter the Membership Description" name="membershipName" /> */}

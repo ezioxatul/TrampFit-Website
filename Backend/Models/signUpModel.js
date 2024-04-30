@@ -22,7 +22,11 @@ const signupModel = sequelize.define('signup', {
         type:DataTypes.STRING,
         allowNull:false,
         required:true
-    }
+    },
+    totalSession:{
+      type:DataTypes.INTEGER,
+      allowNull:true
+  }
   }, {
     freezeTableName : true
   });
