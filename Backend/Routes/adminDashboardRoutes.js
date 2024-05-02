@@ -48,5 +48,12 @@ router.put('/adminDashboard/manageMembership/updateMembership',adminSecretKey,jw
 // 4. Delete membership Details (making status active to INactive)
 router.put('/adminDashboard/manageMembership/deleteMembership',adminSecretKey,jwtVerification,deactivateMembershipLimitCheck,adminDashboardController.deleteMembershipController);
 
+//adminDashboard ->  payment History
+
+// 1. get all payment Detail
+router.get('/adminDashboard/paymentHistory',adminSecretKey,jwtVerification,adminDashboardController.getAllPaymentHistoryController);
+
+// 2. search the payment history
+router.get('/adminDashboard/paymentHistory/searchTransaction',adminDashboardController.paymentHistorySearchController);
 
 module.exports = router;

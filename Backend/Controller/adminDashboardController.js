@@ -1,6 +1,6 @@
-const { response } = require("express");
 const membershipDetailsModel = require('../Models/membershipModel.config');
 const userSignupModel = require('../Models/signUpModel');
+const paymentHistoryModel = require('../Models/paymentDetailModel');
 const partnerLoginModel = require('../Models/partnerLoginModel');
 const { where, Op } = require("sequelize");
 const sequelize = require("../databaseConnection");
@@ -27,7 +27,7 @@ const adminTokenCheckController = (req, res) => {
 const addMembershipController = async (req, res) => {
     try {
 
-        let { membershipName, amount, validity, session ,description } = req.body;
+        let { membershipName, amount, validity, session, description } = req.body;
 
         await membershipDetailsModel.create({
             membershipName,
@@ -99,7 +99,7 @@ const getAllMembershipDetailsController = async (req, res) => {
 const updateMembershipController = async (req, res) => {
     try {
         let id = req.query.id;
-        let { membershipName, amount, validity,session, description } = req.body;
+        let { membershipName, amount, validity, session, description } = req.body;
 
 
         await membershipDetailsModel.update({
@@ -305,33 +305,134 @@ const searchPartnerController = async (req, res) => {
     }
 }
 
-const filterPartnerController = async(req,res) => {
-    try{
+const filterPartnerController = async (req, res) => {
+    try {
 
         let filterInfo = Object.values(req.query);
-        
+
         let partnerFilterData = await partnerLoginModel.findAll({
-            attributes : ['id', 'fullName', 'mobileNumber', 'email', 'status'] ,
-            where : {
-                status : {
-                    [Op.in] : filterInfo
+            attributes: ['id', 'fullName', 'mobileNumber', 'email', 'status'],
+            where: {
+                status: {
+                    [Op.in]: filterInfo
                 }
             }
         })
 
         res.json({
-            message : "Data filtered Successfully" ,
-            response : true , 
-            data : partnerFilterData
+            message: "Data filtered Successfully",
+            response: true,
+            data: partnerFilterData
         })
 
-    } catch(err) {
+    } catch (err) {
         console.log(err);
 
         res.json({
-            message : "Something went wrong !!",
-            response : false
+            message: "Something went wrong !!",
+            response: false
         });
+    }
+}
+
+// payment History
+
+// 1. get All payment Details
+
+const getAllPaymentHistoryController = async (req, res) => {
+    try {
+
+
+        let getAllPaymentData = await userSignupModel.findAll({
+            include: [
+                {
+                    model: paymentHistoryModel,
+                    attributes: ['id', 'paidAmount', 'startDate', 'invoiceNumber', 'downloadInvoice', 'invoiceId', 'status'],
+                    as: 'paymentInfo'
+                }
+            ],
+            attributes: ['id', 'fullName', 'email'],
+            where: {
+                MembershipId: {
+                    [Op.ne]: null
+                }
+            }
+        })
+
+        res.json({
+            message: "Payment History",
+            response: true,
+            data: getAllPaymentData
+        })
+
+
+    } catch (err) {
+        console.log(err);
+
+        res.json({
+            message: "Something went wrong !!",
+            response: false
+        })
+    }
+}
+
+// 2. apply searching in payment history
+const paymentHistorySearchController = async (req, res) => {
+    try {
+
+        let { searchTransaction } = req.query;
+
+        let getSearchPaymentData = await userSignupModel.findAll({
+            include: [
+                {
+                    model: paymentHistoryModel,
+                    attributes: ['id', 'paidAmount', 'startDate', 'invoiceNumber', 'downloadInvoice', 'invoiceId', 'status'],
+                    as: 'paymentInfo'
+                }
+            ],
+            attributes: ['id', 'fullName', 'email'],
+            where: {
+                [Op.and]: [{
+                    MembershipId: {
+                        [Op.ne]: null
+                    }
+                }, {
+                    [Op.or]: [
+                        {
+                            fullName: {
+                                [Op.iLike]: `%${searchTransaction}%`
+                            }
+                        },
+                        {
+                            '$paymentInfo.invoiceId$': {
+                                [Op.iLike]: `%${searchTransaction}%`
+                            }
+                        },
+                        {
+                            '$paymentInfo.invoiceNumber$': {
+                                [Op.iLike]: `%${searchTransaction}%`
+                            }
+                        }
+                    ]
+                }
+                ]
+            }
+        })
+
+        res.json({
+            message : "search Data",
+            response : true,
+            data : getSearchPaymentData
+        })
+
+    } catch (err) {
+
+        console.log(err);
+
+        res.json({
+            message: "Something went wrong !!",
+            response: false
+        })
     }
 }
 
@@ -345,5 +446,7 @@ module.exports = {
     getUserInfoController,
     searchPartnerController,
     searchUserController,
-    filterPartnerController
+    filterPartnerController,
+    getAllPaymentHistoryController,
+    paymentHistorySearchController
 }

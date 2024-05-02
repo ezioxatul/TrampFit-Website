@@ -156,6 +156,7 @@ export default function partners() {
     const handlerSearchData = (e) => {
 
         setSearchData(e.target.value);
+        console.log(searchData);
         setApplySearch(!applySearch);
 
     }
