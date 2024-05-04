@@ -4,6 +4,7 @@ const paymentHistoryModel = require('../Models/paymentDetailModel');
 const partnerLoginModel = require('../Models/partnerLoginModel');
 const { where, Op } = require("sequelize");
 const sequelize = require("../databaseConnection");
+const { response } = require('express');
 
 // admin Token Check...
 
@@ -21,6 +22,32 @@ const adminTokenCheckController = (req, res) => {
     }
 }
 
+const getAllCountController = async(req,res) => {
+    try {
+
+        let totalUsers = await userSignupModel.count();
+        let totalPartners = await partnerLoginModel.count();    
+        let activeMembers = await paymentHistoryModel.count({
+            where : {
+                status : "active"
+            }
+        })
+        res.json({
+            message : "counts",
+            response : true,
+            totalUsers,
+            totalPartners,
+            activeMembers
+        });
+    } catch(err) {
+        console.log(err);
+
+        res.json({
+            message : "Something went wrong !!",
+            response : false  
+        })
+    }
+}
 
 // add Membership API
 
@@ -438,6 +465,7 @@ const paymentHistorySearchController = async (req, res) => {
 
 module.exports = {
     adminTokenCheckController,
+    getAllCountController,
     addMembershipController,
     getAllMembershipDetailsController,
     updateMembershipController,

@@ -9,8 +9,11 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
 import FilterAltOffIcon from '@mui/icons-material/FilterAltOff';
+import { useRouter } from "next/router";
 
 export default function partners() {
+    let router = useRouter();
+
     let [partnerInfo, setPartnerInfo] = useState([]);
     let [searchData, setSearchData] = useState();
     let [applySearch, setApplySearch] = useState(false);
@@ -51,31 +54,45 @@ export default function partners() {
     useEffect(() => {
         try {
             let token = localStorage.getItem("adminToken");
+            if (token) {
 
-            const option = {
-                method: "GET",
-                headers: {
-                    Authorization: `Bearer ${token}`,
+                const option = {
+                    method: "GET",
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    }
                 }
-            }
 
-            fetch('http://localhost/adminDashboard/getPartnersInfo', option).then(async (res) => {
+                fetch('http://localhost/adminDashboard/getPartnersInfo', option).then(async (res) => {
 
-                let partnerInfo = await res.json();
+                    let partnerInfo = await res.json();
 
-                let newPartnerData = [];
+                    if (partnerInfo.response) {
 
-                partnerInfo.data.map((val) => {
-                    let partnerData = Object.values(val);
-                    partnerData.push('View Detail');
-                    newPartnerData.push(partnerData);
+                        let newPartnerData = [];
+
+                        partnerInfo.data.map((val) => {
+                            let partnerData = Object.values(val);
+                            partnerData.push('View Detail');
+                            newPartnerData.push(partnerData);
+                        })
+
+                        setPartnerInfo(newPartnerData);
+                    } else {
+                        toast.error(partnerInfo.response);
+                        setTimeout(()=>{
+                            router.push('/admin');
+                        },3000);
+                    }
+
+                }).catch((err) => {
+                    console.log(err);
                 })
 
-                setPartnerInfo(newPartnerData);
+            } else {
+                router.push('/admin');
+            }
 
-            }).catch((err) => {
-                console.log(err);
-            })
 
         } catch (err) {
             console.log(err);

@@ -10,39 +10,50 @@ import DialogTitle from '@mui/material/DialogTitle';
 import { Input } from "@/components/ui/input"
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function deleteAccount() {
     let router = useRouter();
     let queryParameter = router.query.userInfo;
     let phoneNumber = queryParameter;
 
-    let[fullName,setFullName] = useState();
-    let[buttonText,setButtonText] = useState("Request OTP");
-    let[changingButton,setChangingButton] = useState(false);
-    let[otp,setOtp] = useState("");
-    let[response,setResponse] = useState(false);
-    
-    useEffect(()=>{
+    let [fullName, setFullName] = useState();
+    let [buttonText, setButtonText] = useState("Request OTP");
+    let [changingButton, setChangingButton] = useState(false);
+    let [otp, setOtp] = useState("");
+    let [response, setResponse] = useState(false);
+
+    useEffect(() => {
         let token = localStorage.getItem("token");
         setFullName(localStorage.getItem("fullName"))
-        const option = {
-            method : "GET",
-            headers : {
-                Authorization : `Bearer ${token}`
+        if (token) {
+            const option = {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
             }
+
+            fetch('http://localhost/tokenCheck', option).then(async (res) => {
+                let tokenCheckResponse = await res.json();
+                if (tokenCheckResponse.response) {
+                    setResponse(true);
+                } else {
+                    toast.error(tokenCheckResponse.message);
+                    setTimeout(()=>{
+                        router.push("/");
+                    },3000);
+                    setResponse(false);
+                }
+            }).catch((err) => {
+                setResponse(false);
+            })
+        } else {
+            router.push('/');
         }
 
-        fetch('http://localhost/tokenCheck',option).then(async(res)=>{
-            let tokenCheckResponse = await res.json();
-            if(tokenCheckResponse.response){
-                setResponse(true);
-            } else {
-                setResponse(false);
-            }
-        }).catch((err)=>{
-            setResponse(false);
-        })
-    },[])
+    }, [])
 
     const [open, setOpen] = useState();
 
@@ -52,53 +63,53 @@ export default function deleteAccount() {
 
     const handleClose = () => {
         setOpen(false);
-        setTimeout(()=>{
+        setTimeout(() => {
             setButtonText("Request OTP")
             setChangingButton(false)
-        },1000)
-      
+        }, 1000)
+
     };
 
-    const getOtp = (e) =>{
+    const getOtp = (e) => {
         setOtp(e.target.value);
     }
 
-    const enterOtp = async()=>{
-        if(buttonText === 'Request OTP'){
+    const enterOtp = async () => {
+        if (buttonText === 'Request OTP') {
             setChangingButton(true);
             setButtonText("Verify OTP");
         } else {
-            if(otp === '123456'){
+            if (otp === '123456') {
                 let token = localStorage.getItem("token");
                 try {
                     const option = {
-                        method : "DELETE",
-                        headers : {
-                            Authorization : `Bearer ${token}`
+                        method: "DELETE",
+                        headers: {
+                            Authorization: `Bearer ${token}`
                         }
                     }
 
-                    let deleteAccount = await fetch("http://localhost/deleteUserDetails",option);
+                    let deleteAccount = await fetch("http://localhost/deleteUserDetails", option);
                     let deleteAccountResponse = await deleteAccount.json();
 
-                    if(deleteAccountResponse.response) {
+                    if (deleteAccountResponse.response) {
                         localStorage.removeItem("token");
                         router.push('/');
-                    } 
-                } catch(err) {
+                    }
+                } catch (err) {
                     console.log(err);
                 }
-             
-                
+
+
             }
         }
     }
     return (
         <>
             <div className="flex flex-col min-h-screen">
-                <Navbar/>
+                <Navbar />
                 <div className=" flex">
-                    <UserSideBar mobileNumber={phoneNumber} profileName={fullName}/>
+                    <UserSideBar mobileNumber={phoneNumber} profileName={fullName} />
                     <div className=" mb-10">
                         <h1 className=" font-semibold mt-8 ml-10 text-xl">When you delete your account :</h1>
                         <p className="mt-4 ml-10 text-lg">We will miss you !</p>
@@ -118,6 +129,7 @@ export default function deleteAccount() {
                         </ul>
 
                         <Button className=" w-44 h-12 hover:bg-green-700 text-lg bg-green-600 ml-10 mt-8 p-2" onClick={handleClickOpen}>Delete Account</Button>
+                        <ToastContainer />
                         <Dialog
                             open={open}
                             onClose={handleClose}
@@ -126,15 +138,15 @@ export default function deleteAccount() {
                             <DialogContent>
                                 <DialogContentText className=" mb-4 w-96">
                                     {
-                                    changingButton ? <span>OTP was sent to <span className=" font-semibold text-black text-sm">{phoneNumber}</span></span>:
-                                    "You will recieve a text to validate your number"
+                                        changingButton ? <span>OTP was sent to <span className=" font-semibold text-black text-sm">{phoneNumber}</span></span> :
+                                            "You will recieve a text to validate your number"
                                     }
                                 </DialogContentText>
                                 {
-                                    changingButton ? <Input placeHolder="Enter the OTP" name="otp" value={otp} onChange={getOtp} /> : 
-                                    <Input value={phoneNumber} name="mobileNumber" />
+                                    changingButton ? <Input placeHolder="Enter the OTP" name="otp" value={otp} onChange={getOtp} /> :
+                                        <Input value={phoneNumber} name="mobileNumber" />
                                 }
-                                
+
                             </DialogContent>
                             <DialogActions className=" mr-4">
                                 <Button onClick={handleClose} className=" mr-3  hover:bg-green-700 bg-green-600 text-white">Cancel</Button>

@@ -10,6 +10,7 @@ import { loadStripe } from '@stripe/stripe-js';
 import Popup from "@/components/Popup";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useRouter } from "next/router";
 
 export async function getStaticProps() {
     const res = await fetch('http://localhost/getActiveMembership')
@@ -19,7 +20,7 @@ export async function getStaticProps() {
 }
 
 export default function membership({ information }) {
-
+    let router = useRouter();
     let [start, setStart] = useState(false);
     let [nextStart, setNextStart] = useState(false);
 
@@ -34,11 +35,14 @@ export default function membership({ information }) {
 
     const handlePlan = (e) => {
 
-        setMembershipPlan(e.target.value);
-        setPayableAmount(information[e.target.id].amount);
-        setSelectPlanValidity(information[e.target.id].validity);
-        setPlanDescription(information[e.target.id].description);
-        setMembershipId(information[e.target.id].id);
+        if (e.target.id != "") {
+            setMembershipPlan(e.target.value);
+            setPayableAmount(information[e.target.id].amount);
+            setSelectPlanValidity(information[e.target.id].validity);
+            setPlanDescription(information[e.target.id].description);
+            setMembershipId(information[e.target.id].id);
+        }
+
     }
 
     const handlePayment = async () => {
@@ -56,32 +60,42 @@ export default function membership({ information }) {
         try {
             let token = localStorage.getItem("token");
 
-            const option = {
-                method: "POST",
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`
-                },
-                body: JSON.stringify(bodyObject)
-            }
-
-            let paymentResponse = await fetch('http://localhost/createSubscription', option);
-            paymentResponse = await paymentResponse.json();
-
-            if (paymentResponse.response) {
-
-                if (paymentResponse.sessionId) {
-
-                    stripePromise.redirectToCheckout({
-                        sessionId: paymentResponse.sessionId,
-                    });
-
-                } else {
-
-                    setStart(true);
-                    setSubscriptionId(paymentResponse.subscriptionId);
+            if (token) {
+                const option = {
+                    method: "POST",
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`
+                    },
+                    body: JSON.stringify(bodyObject)
                 }
+
+                let paymentResponse = await fetch('http://localhost/createSubscription', option);
+                paymentResponse = await paymentResponse.json();
+
+                if (paymentResponse.response) {
+
+                    if (paymentResponse.sessionId) {
+
+                        stripePromise.redirectToCheckout({
+                            sessionId: paymentResponse.sessionId,
+                        });
+
+                    } else {
+
+                        setStart(true);
+                        setSubscriptionId(paymentResponse.subscriptionId);
+                    }
+                } else {
+                    toast.error(paymentResponse.message);
+                    setTimeout(()=>{
+                        router.push('/membership');
+                    },3000);
+                }
+            } else {
+                router.push('/login')
             }
+
 
         } catch (err) {
             console.log(err);
@@ -113,11 +127,11 @@ export default function membership({ information }) {
     }
 
 
-    const confirmation = ()=> {
+    const confirmation = () => {
         setNextStart(true);
     }
 
-    const notConfirmed = () =>{
+    const notConfirmed = () => {
         setNextStart(false);
     }
 

@@ -16,51 +16,62 @@ import 'react-toastify/dist/ReactToastify.css';
 
 export default function AdminLogin() {
     const router = useRouter();
-    let [adminCredential,setAdminCredential] = useState({
-        username:"",
-        password:""
+    let [adminCredential, setAdminCredential] = useState({
+        username: "",
+        password: ""
     })
-    const getAdminCredential = (e) =>{
-        if(e.target.name === 'username'){
+
+    let [activeUsername, setActiveUsername] = useState(false);
+    let [activePassword, setActivePassword] = useState(false);
+    const getAdminCredential = (e) => {
+        if (e.target.name === 'username') {
             adminCredential.username = e.target.value;
-            setAdminCredential({...adminCredential});
+            setAdminCredential({ ...adminCredential });
         } else {
             adminCredential.password = e.target.value;
-            setAdminCredential({...adminCredential});
+            setAdminCredential({ ...adminCredential });
         }
 
     }
 
-    const authenticateAdmin = async(e)=> {
+    const authenticateAdmin = async (e) => {
         e.preventDefault();
-        console.log(adminCredential)
 
-        const option = {
-            method : 'POST',
-            headers : {
-                'Content-Type' : 'application/json'
-            },
-            body : JSON.stringify(adminCredential)
-        }
-
-        let adminLogin = await fetch('http://localhost/adminLogin',option);
-        adminLogin = await adminLogin.json();
-
-        if(adminLogin.response){
-            let token = adminLogin.token;
-            localStorage.setItem("adminToken",token);
-
-            toast.success("Login Successfully");
-            setTimeout(()=>{
-                router.push('/admin/adminDashboard')
-            },6000);
-              
+        if (adminCredential.username === "") {
+            setActiveUsername(true);
+            setActivePassword(false);
+        } else if (adminCredential.password == "") {
+            setActiveUsername(false);
+            setActivePassword(true);
         } else {
-            toast.error("Error Has been occur");
-            adminCredential.username = ""
-            adminCredential.password = ""
-            setAdminCredential({...adminCredential});
+            const option = {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(adminCredential)
+            }
+
+            let adminLogin = await fetch('http://localhost/adminLogin', option);
+            adminLogin = await adminLogin.json();
+
+            if (adminLogin.response) {
+                let token = adminLogin.token;
+                localStorage.setItem("adminToken", token);
+
+                toast.success("Login Successfully");
+                setTimeout(() => {
+                    router.push('/admin/adminDashboard')
+                }, 6000);
+
+            } else {
+                toast.error(adminLogin.message);
+                adminCredential.username = ""
+                adminCredential.password = ""
+                setAdminCredential({ ...adminCredential });
+            }
         }
+
     }
     return (
         <>
@@ -72,19 +83,21 @@ export default function AdminLogin() {
                     </CardHeader>
                     <CardContent>
                         <form >
-                            <div className="grid w-full items-center gap-4">
+                            <div className="grid w-full items-center gap-5">
                                 <div className="flex flex-col space-y-1.5">
-                                    <Input id="name" placeholder="Enter your username" type="text" className="mt-5 mb-4 text-md" name="username" onChange={getAdminCredential} value={adminCredential.username}/>
+                                    <Input id="name" placeholder="Enter your username" type="text" className="mt-5  text-md" name="username" onChange={getAdminCredential} value={adminCredential.username} />
+                                    {activeUsername && <p className="text-red-600 text-sm h-4">*username is required</p>}
                                 </div>
                                 <div className="flex flex-col space-y-1.5">
-                                    <Input id="name" placeholder="Enter your password" type="password" className="text-md mb-4" name="password" onChange={getAdminCredential} value={adminCredential.password}/>
+                                    <Input id="name" placeholder="Enter your password" type="password" className="text-md" name="password" onChange={getAdminCredential} value={adminCredential.password} />
+                                    {activePassword && <p className="text-red-600 text-sm h-4">*Password is required</p>}
                                 </div>
                             </div>
                         </form>
                     </CardContent>
                     <CardFooter className="flex justify-between">
                         <Button className=" hover:bg-green-700 bg-green-600 w-96 mb-5" onClick={authenticateAdmin}>Login</Button>
-                        <ToastContainer/>
+                        <ToastContainer />
                     </CardFooter>
                 </div>
                 <Separator orientation="vertical" className="h-96 my-auto bg-green-400 border " />

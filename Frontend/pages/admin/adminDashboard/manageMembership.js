@@ -19,6 +19,7 @@ import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import Popup from "@/components/Popup";
 
 export default function manageMembership() {
+    let router = useRouter();
     let [isContain, setIsContain] = useState();
     let [ischanged, setIsChanged] = useState("");
     let [updateForm, setUpdateForm] = useState(false);
@@ -30,22 +31,27 @@ export default function manageMembership() {
 
     useEffect(() => {
         let token = localStorage.getItem("adminToken");
-        const option = {
-            method: "GET",
-            headers: {
-                Authorization: `Bearer ${token}`
+        if (token) {
+            const option = {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
             }
+
+            fetch("http://localhost/adminDashboard/manageMembership", option).then(async (res) => {
+                let membershipData = await res.json();
+
+                if (!membershipData.response) {
+                    router.push('/admin');
+                }
+            }).catch((err) => {
+                console.log(err);
+            })
+        } else {
+            router.push('/admin');
         }
 
-        fetch("http://localhost/adminDashboard/manageMembership", option).then(async (res) => {
-            let membershipData = await res.json();
-
-            if (!membershipData.response) {
-                router.push('/admin');
-            }
-        }).catch((err) => {
-            console.log(err);
-        })
     }, [])
 
     useEffect(() => {
@@ -64,7 +70,7 @@ export default function manageMembership() {
     }, [ischanged])
 
 
-    let router = useRouter();
+    
     let [addMembership, setAddMembership] = useState(false);
     let [addMembershipData, setAddMembershipData] = useState({
         membershipName: "",
