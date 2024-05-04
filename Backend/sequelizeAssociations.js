@@ -1,5 +1,6 @@
 const sequelize = require('./databaseConnection');
-
+const partnerLoginModel = require('./Models/partnerLoginModel');
+const gymDetailsModel = require('./Models/gymDetailsModel');
 const userSignupModel = require('./Models/signUpModel')
 const paymentDetailModel = require('./Models/paymentDetailModel');
 
@@ -11,6 +12,9 @@ const sequelizeAssociations =  () => {
 
     userSignupModel.hasMany(paymentDetailModel, { foreignKey: "userId", as: "paymentInfo",onDelete : "CASCADE" });
     paymentDetailModel.belongsTo(userSignupModel, { foreignKey: "userId", as: "paymentInfo" });
+
+    partnerLoginModel.hasOne(gymDetailsModel, { foreignKey: "partnerId", as: "gymInfo" });
+    gymDetailsModel.belongsTo(partnerLoginModel, { foreignKey: "partnerId", as: "gymInfo" });
 }
 
 sequelize.sync({ alter: false }).then((res) => {
