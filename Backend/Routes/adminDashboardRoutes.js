@@ -9,6 +9,10 @@ const router = express.Router();
 
 router.get('/adminDashboard',adminSecretKey,jwtVerification,adminDashboardController.adminTokenCheckController);
 
+
+// adminDashboard 
+router.get('/adminDashboard/count',adminSecretKey,jwtVerification,adminDashboardController.getAllCountController);
+
 // adminDashboard -> Users
 
 // 1. get all Users Information

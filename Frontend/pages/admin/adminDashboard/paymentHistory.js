@@ -9,8 +9,12 @@ import { Button } from "@/components/ui/button";
 import DialogContent from '@mui/material/DialogContent';
 import { useEffect, useState } from 'react';
 import Link from "next/link";
+import { useRouter } from 'next/router';
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function paymentHistory() {
+    let router = useRouter();
     let [searchTransaction, setSearchTransaction] = useState();
     let [applyPaymentSearch, setApplyPaymentSearch] = useState(false);
 
@@ -28,33 +32,43 @@ export default function paymentHistory() {
 
     useEffect(() => {
         let token = localStorage.getItem("adminToken");
+        if (token) {
+            try {
 
-        try {
-
-            const option = {
-                method: "GET",
-                headers: {
-                    Authorization: `Bearer ${token}`
+                const option = {
+                    method: "GET",
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
                 }
-            }
 
-            fetch("http://localhost/adminDashboard/paymentHistory", option).then(async (res) => {
+                fetch("http://localhost/adminDashboard/paymentHistory", option).then(async (res) => {
 
-                let paymentInfo = await res.json();
+                    let paymentInfo = await res.json();
+                    if(paymentInfo.response) {
+                        paymentInfo = paymentInfo.data;
+                        setPaymentDetails(paymentInfo)
 
-                paymentInfo = paymentInfo.data;
+                    } else {
+                        toast.error(paymentInfo.message);
+                        setTimeout(()=>{
+                            router.push('/admin');
+                        },3000);
+                    }
 
-                setPaymentDetails(paymentInfo)
+                }).catch((err) => {
 
-            }).catch((err) => {
+                    console.log(err);
 
+                })
+
+            } catch (err) {
                 console.log(err);
-
-            })
-
-        } catch (err) {
-            console.log(err);
+            }
+        } else {
+            router.push('/admin');
         }
+
     }, []);
 
     useEffect(() => {
@@ -71,7 +85,7 @@ export default function paymentHistory() {
                     let paymentInfo = await res.json();
 
                     paymentInfo = paymentInfo.data;
-        
+
                     setPaymentDetails(paymentInfo);
 
                 }).catch((err) => {
@@ -167,6 +181,7 @@ export default function paymentHistory() {
                                     <Button className=" hover:bg-green-700  bg-green-600 mt-5 p-2 w-20 text-white mr-2 mb-3 h-10 " onClick={handleCloseButton}>Close</Button>
                                     <Button className=" hover:bg-green-700  bg-green-600 mt-5 p-2 text-white mr-5 mb-3 " ><Link href={paymentHistoryDetail.downloadInvoice}>Download Invoice</Link></Button>
                                 </div>
+                                <ToastContainer />
                             </DialogContent>
                         </Dialog>
 

@@ -11,6 +11,9 @@ import CurrencyRupeeIcon from '@mui/icons-material/CurrencyRupee';
 import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 export default function Membership() {
     let router = useRouter();
     let phoneNumber = router.query.userInfo
@@ -27,43 +30,58 @@ export default function Membership() {
         try {
 
             let token = localStorage.getItem("token");
-            const option = {
-                method: "GET",
-                headers: {
-                    Authorization: `Bearer ${token}`
+
+            if (token) {
+                const option = {
+                    method: "GET",
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
                 }
+
+                fetch('http://localhost/getMembershipDetails', option).then(async (res) => {
+
+                    let membershipInfo = await res.json();
+                    if (membershipInfo.response) {
+                        let membershipData = membershipInfo.data[0].paymentInfo
+
+                        let newMembershipInfo = [];
+
+
+                        membershipData.map((val) => {
+                            let membership = Object.values(val);
+
+
+                            let downloadLinking = {}
+                            downloadLinking.subscriptionId = membership[0]
+                            downloadLinking.downloadLink = membership[6]
+
+                            downloadLink.push(downloadLinking);
+
+                            membership.pop();
+                            membership.push('View Detail');
+                            newMembershipInfo.push(membership);
+                        })
+
+                        setDownloadLink([...downloadLink]);
+
+                        setMembershipDetails(newMembershipInfo);
+                    } else {
+                        toast.error(membershipInfo.message);
+
+                        setTimeout(() => {
+                            router.push('/');
+                        }, 3000);
+                    }
+
+
+                }).catch((err) => {
+                    console.log(err);
+                })
+            } else {
+                router.push('/');
             }
 
-            fetch('http://localhost/getMembershipDetails', option).then(async (res) => {
-
-                let membershipInfo = await res.json();
-                let membershipData = membershipInfo.data[0].paymentInfo
-
-                let newMembershipInfo = [];
-
-               
-                membershipData.map((val) => {
-                    let membership = Object.values(val);
-
-
-                    let downloadLinking = {}
-                    downloadLinking.subscriptionId = membership[0]
-                    downloadLinking.downloadLink = membership[6]
-
-                    downloadLink.push(downloadLinking);
-
-                    membership.pop();
-                    membership.push('View Detail');
-                    newMembershipInfo.push(membership);
-                })
-
-                setDownloadLink([...downloadLink]);
-
-                setMembershipDetails(newMembershipInfo);
-
-            }).catch((err) => {
-                console.log(err);
-            })
 
         } catch (err) {
             console.log(err);
@@ -75,38 +93,44 @@ export default function Membership() {
         try {
 
             let token = localStorage.getItem("token");
-            const option = {
-                method: "GET",
-                headers: {
-                    Authorization: `Bearer ${token}`
+
+            if (token) {
+                const option = {
+                    method: "GET",
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
                 }
+
+                fetch("http://localhost/getActiveMembershipDetails", option).then(async (res) => {
+
+                    let activeMembership = await res.json();
+
+                    if (activeMembership.response) {
+
+                        let activedata = activeMembership.data[0].paymentInfo[0]
+
+                        let activeLinks = {}
+                        activeLinks.subscriptionId = activedata.subscriptionId
+                        activeLinks.downloadLink = activedata.downloadInvoice
+
+                        downloadLink.push(activeLinks);
+
+                        setDownloadLink([...downloadLink]);
+
+                        setActiveMembershipInfo(activedata);
+
+                    } else {
+                        setActiveSubscription(false);
+                    }
+
+                }).catch((err) => {
+                    console.log(err);
+                })
+            } else {
+                router.push("/");
             }
 
-            fetch("http://localhost/getActiveMembershipDetails", option).then(async (res) => {
-
-                let activeMembership = await res.json();
-
-                if (activeMembership.response) {
-
-                    let activedata = activeMembership.data[0].paymentInfo[0]
-
-                    let activeLinks = {}
-                    activeLinks.subscriptionId = activedata.subscriptionId
-                    activeLinks.downloadLink = activedata.downloadInvoice
-
-                    downloadLink.push(activeLinks);
-
-                    setDownloadLink([...downloadLink]);
-
-                    setActiveMembershipInfo(activedata);
-
-                } else {
-                    setActiveSubscription(false);
-                }
-
-            }).catch((err) => {
-                console.log(err);
-            })
 
         } catch (err) {
             console.log(err)
@@ -203,6 +227,7 @@ export default function Membership() {
                                 </div>
                             </DialogContent>
                         </Dialog>
+                        <ToastContainer />
                     </div>
                 </div>
                 <Footer />

@@ -6,62 +6,75 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function UserDashboard() {
     let router = useRouter();
-    let[response,setResponse] = useState();
-    let [personalInfo,setPersonalInfo] = useState({
-        name:"",
-        city:"",
-        mobileNumber:"",
-        email:""
+    let [loading,setLoading] = useState(false);
+    let [response, setResponse] = useState();
+    let [personalInfo, setPersonalInfo] = useState({
+        name: "",
+        city: "",
+        mobileNumber: "",
+        email: ""
     })
     const drawerWidth = 240;
 
     useEffect(() => {
         let token = localStorage.getItem("token");
-        try {
-            const option = {
-                method: "GET",
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }   
-            }
 
-            fetch('http://localhost/getUserDetails',option).then(async(res) =>{
-                let userDetailsResponse = await res.json();
+        if (token) {
+            try {
 
-                if(userDetailsResponse.response) {
-
-                    personalInfo.name = userDetailsResponse.personalInfo.fullName
-                    personalInfo.city = userDetailsResponse.personalInfo.city
-                    personalInfo.email = userDetailsResponse.personalInfo.email,
-                    personalInfo.mobileNumber = userDetailsResponse.personalInfo.mobileNumber
-
-                    setPersonalInfo({...personalInfo});
-
-                    localStorage.setItem("fullName",personalInfo.name)
-    
-                    setResponse(true)
-
-                } else {
-                    setResponse(false)
-                    router.push('/');
+                const option = {
+                    method: "GET",
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
                 }
-            }).catch((err)=>{
-                setResponse(false);
-            })
-        } catch (err) {
-            console.log(err);
+
+                fetch('http://localhost/getUserDetails', option).then(async (res) => {
+                    let userDetailsResponse = await res.json();
+
+                    if (userDetailsResponse.response) {
+
+                        personalInfo.name = userDetailsResponse.personalInfo.fullName
+                        personalInfo.city = userDetailsResponse.personalInfo.city
+                        personalInfo.email = userDetailsResponse.personalInfo.email,
+                            personalInfo.mobileNumber = userDetailsResponse.personalInfo.mobileNumber
+
+                        setPersonalInfo({ ...personalInfo });
+
+                        localStorage.setItem("fullName", personalInfo.name)
+
+                        setResponse(true)
+
+                    } else {
+                        setResponse(false)
+                        toast.error(userDetailsResponse.message);
+                        setTimeout(()=>{
+                            router.push('/');
+                        },3000);
+                        
+                    }
+                }).catch((err) => {
+                    setResponse(false);
+                })
+            } catch (err) {
+                console.log(err);
+            }
+        } else {
+            router.push('/');
         }
-    },[]);
+
+    }, []);
     return (
         <>
             <div className="flex flex-col min-h-screen">
-                <Navbar/>
+                <Navbar />
                 <div className=" flex">
-                    <UserSideBar mobileNumber={personalInfo.mobileNumber} profileName={personalInfo.name}/>
+                    <UserSideBar mobileNumber={personalInfo.mobileNumber} profileName={personalInfo.name} />
                     <div className=" mx-auto mt-12">
                         <Avatar className=" w-36 h-36 text-6xl bg-black" src="/avtar.png"></Avatar>
                     </div>
@@ -90,6 +103,7 @@ export default function UserDashboard() {
                             <Label htmlFor="city" className="text-lg text-green-600 font-normal">Email Address</Label>
                             <Input type="text" className=" w-96 text-lg border-2" value={personalInfo.email} />
                         </div>
+                        <ToastContainer />
                     </div>
                 </div>
                 <Footer />

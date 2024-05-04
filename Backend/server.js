@@ -12,9 +12,6 @@ const sequelizeAssociations = require('./sequelizeAssociations')();
 
 const App = express()
 
-
-// notifyUserEndingSubscription(date,'sub_1PApiCSHakBeEW1YHtqNE6Eb','2','sharmaadarsh180@gmail.com');
-
 // setting template engine
 App.set("view engine","pug")
   
