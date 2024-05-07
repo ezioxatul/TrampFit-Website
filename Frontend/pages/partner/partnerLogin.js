@@ -71,7 +71,22 @@ const partnerLogin = () => {
           if (partnerExistResponse.response) {
             localStorage.setItem("partnerToken", partnerExistResponse.token);
             toast.success("Signed In Successfully");
-            router.push("/partner/partnerdashboard");
+
+            if (partnerExistResponse.status === "Approved") {
+
+                setTimeout(() => {
+                  router.push("/partner/partnerDashboard");
+                }, 3000)
+
+            } else {
+
+                setTimeout(() => {
+                  router.push("/partner/waitingPartnersOnboarding");
+                }, 3000)
+
+            }
+
+
           } else {
             toast.success("OTP Verified");
             setInputTextController(false);
@@ -117,7 +132,7 @@ const partnerLogin = () => {
         } else {
           toast.error(emailExistsResponse.message);
         }
-      } catch {}
+      } catch { }
     }
   };
 
@@ -135,8 +150,8 @@ const partnerLogin = () => {
               {descriptionText == null
                 ? "You will receive a text message to validate."
                 : inputTextController
-                ? "OTP sent to "
-                : "Please Enter your Details"}
+                  ? "OTP sent to "
+                  : "Please Enter your Details"}
               <span className=" font-bold">
                 {inputTextController && descriptionText}
               </span>

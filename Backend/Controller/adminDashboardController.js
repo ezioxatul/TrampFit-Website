@@ -88,7 +88,7 @@ const getAllMembershipDetailsController = async (req, res) => {
     try {
 
         let membershipDetails = await membershipDetailsModel.findAll({
-            attributes: ['membershipName', 'amount', 'validity', 'description', 'status', 'id'],
+            attributes: ['membershipName', 'amount', 'validity', 'description', 'status', 'id','session'],
             order: sequelize.col('id')
         });
 
@@ -261,6 +261,154 @@ const searchUserController = async (req, res) => {
     }
 }
 
+// view membership detail of individual users
+
+const getUserMembershipDetailController = async (req, res) => {
+    try {
+
+        let userId = req.query.id;
+
+        let getMembershipData = await userSignupModel.findAll({
+            include: [
+                {
+                    model: paymentHistoryModel,
+                    attributes: ['subscriptionId', 'subscriptionName', 'paidAmount', 'startDate', 'endDate', 'status', 'downloadInvoice'],
+                    as: 'paymentInfo',
+                    order : sequelize.col('id')
+                }
+            ],
+            attributes: [],
+            where: {
+                id: userId
+            },
+            order : sequelize.col('id')
+        })
+
+        res.json({
+            message: "Membership Information",
+            response: true,
+            data: getMembershipData
+        })
+
+    } catch (err) {
+        console.log(err);
+        res.json({
+            message: "Something went wrong !!",
+            response: false
+        })
+    }
+}
+
+// view active membership of indevidual user
+const getUserActiveMembershipController = async (req, res) => {
+    try {
+
+        let userId = req.query.id;
+
+        let getMembershipData = await userSignupModel.findAll({
+            include: [
+                {
+                    model: paymentHistoryModel,
+                    attributes: ['subscriptionId', 'subscriptionName', 'paidAmount', 'startDate', 'endDate', 'status', 'downloadInvoice'],
+                    as: 'paymentInfo',
+                    where : {
+                        status : 'active'
+                    }
+                }
+            ],
+            attributes: [],
+            where: {
+                id: userId
+            }
+        })
+
+        if(getMembershipData.length === 0) {
+            res.json({
+                message: "No Active Membership",
+                response: false
+            })
+        }
+        else {
+
+            res.json({
+                message: "Active Membership",
+                response: true,
+                data: getMembershipData
+            })
+
+        }
+
+    } catch (err) {
+        console.log(err);
+
+        res.json({
+            message: "Something went wrong !!",
+            response: false,
+        })
+    }
+}
+
+// filter user membership information
+const filterUserMembershipController = async(req,res) => {
+    try {
+
+        let userId = req.query.userId;
+        let filterMembershipData = Object.values(req.query);
+        filterMembershipData.pop();
+
+        let getUserFilterMembershipData = await userSignupModel.findAll({
+            include : [
+                {
+                    model : paymentHistoryModel,
+                    attributes : ['subscriptionId', 'subscriptionName', 'paidAmount', 'startDate', 'endDate', 'status', 'downloadInvoice'],
+                    as : "paymentInfo",
+                    where : {
+                        subscriptionName : {
+                            [Op.in] : filterMembershipData
+                        }   
+                    }
+                }
+            ],
+            attributes : [],
+            where : {
+                id : userId
+            }
+        })
+
+        if(getUserFilterMembershipData.length > 0) {
+
+            res.json({
+                message : "Filter membership information",
+                response : true,
+                data : getUserFilterMembershipData
+            });
+
+        } else {
+            let obj = {
+                paymentInfo : []
+            }
+
+            getUserFilterMembershipData.push(obj);
+
+            res.json({
+                message : "Filter membership information",
+                response : true,
+                data : getUserFilterMembershipData
+            });
+
+        }
+
+        
+
+    } catch(err) {
+        console.log(err);
+
+        res.json({
+            message : "Something went wrong !!",
+            response : false
+        })
+    }
+}
 
 // display partners information on the admin portal
 const getPartnerInfoController = async (req, res) => {
@@ -476,5 +624,8 @@ module.exports = {
     searchUserController,
     filterPartnerController,
     getAllPaymentHistoryController,
-    paymentHistorySearchController
+    paymentHistorySearchController,
+    getUserMembershipDetailController,
+    getUserActiveMembershipController,
+    filterUserMembershipController
 }

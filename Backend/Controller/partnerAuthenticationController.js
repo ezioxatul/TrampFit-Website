@@ -102,7 +102,7 @@ const partnerExistsController = async (req, res) => {
         let { mobileNumber } = req.query;
 
         let partnerInfo = await partnerLoginModel.findOne({
-            attributes: ['fullName'], where: {
+            attributes: ['fullName','status'], where: {
                 mobileNumber: mobileNumber
             }
         })
@@ -112,6 +112,7 @@ const partnerExistsController = async (req, res) => {
         if (partnerInfo != undefined) {
 
             let fullName = partnerInfo.fullName
+            let status = partnerInfo.status
 
             let token = generateToken({
                 fullName: fullName,
@@ -121,7 +122,8 @@ const partnerExistsController = async (req, res) => {
             res.json({
                 message: "Partner already exists",
                 response: true,
-                token: token,
+                status : status,
+                token: token
             })
 
         } else {

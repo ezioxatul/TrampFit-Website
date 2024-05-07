@@ -21,6 +21,14 @@ router.get('/adminDasboard/getUserInfo',adminSecretKey,jwtVerification,adminDash
 // 2. Search the user
 router.get('/adminDashboard/searchUser',adminDashboardController.searchUserController);
 
+// 3. user view details 
+router.get('/adminDashboard/user/getUserMembershipDetail',adminSecretKey,jwtVerification,adminDashboardController.getUserMembershipDetailController);
+
+// 4. get active user membership in view detail
+router.get('/adminDashboard/user/getUserActiveMembership',adminSecretKey,jwtVerification,adminDashboardController.getUserActiveMembershipController);
+
+// 5. apply filter on individual user membership
+router.get('/adminDashboard/user/filterUserMembership',adminDashboardController.filterUserMembershipController);
 
 // adminDashboard -> Partners
 

@@ -52,53 +52,56 @@ export default function partners() {
     let columnName = ['Partner ID', 'Name', 'Mobile Number', 'Email', 'Status'];
 
     useEffect(() => {
-        try {
-            let token = localStorage.getItem("adminToken");
-            if (token) {
+        if (statusFilter.pending === "" && statusFilter.rejected === "" && statusFilter.approved === "") {
 
-                const option = {
-                    method: "GET",
-                    headers: {
-                        Authorization: `Bearer ${token}`,
+            try {
+                let token = localStorage.getItem("adminToken");
+                if (token) {
+
+                    const option = {
+                        method: "GET",
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        }
                     }
+
+                    fetch('http://localhost/adminDashboard/getPartnersInfo', option).then(async (res) => {
+
+                        let partnerInfo = await res.json();
+
+                        if (partnerInfo.response) {
+
+                            let newPartnerData = [];
+
+                            partnerInfo.data.map((val) => {
+                                let partnerData = Object.values(val);
+                                partnerData.push('View Detail');
+                                newPartnerData.push(partnerData);
+                            })
+
+                            setPartnerInfo(newPartnerData);
+                        } else {
+                            toast.error(partnerInfo.response);
+                            setTimeout(() => {
+                                router.push('/admin');
+                            }, 3000);
+                        }
+
+                    }).catch((err) => {
+                        console.log(err);
+                    })
+
+                } else {
+                    router.push('/admin');
                 }
 
-                fetch('http://localhost/adminDashboard/getPartnersInfo', option).then(async (res) => {
 
-                    let partnerInfo = await res.json();
-
-                    if (partnerInfo.response) {
-
-                        let newPartnerData = [];
-
-                        partnerInfo.data.map((val) => {
-                            let partnerData = Object.values(val);
-                            partnerData.push('View Detail');
-                            newPartnerData.push(partnerData);
-                        })
-
-                        setPartnerInfo(newPartnerData);
-                    } else {
-                        toast.error(partnerInfo.response);
-                        setTimeout(()=>{
-                            router.push('/admin');
-                        },3000);
-                    }
-
-                }).catch((err) => {
-                    console.log(err);
-                })
-
-            } else {
-                router.push('/admin');
+            } catch (err) {
+                console.log(err);
             }
 
-
-        } catch (err) {
-            console.log(err);
         }
-
-    }, []);
+    }, [handleFilterSwitch]);
 
     // apply search 
 

@@ -9,6 +9,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 import { useRouter } from "next/router";
+import userId from "./[userId]";
 
 export default function User() {
     let router = useRouter();
@@ -109,6 +110,12 @@ export default function User() {
 
     }
 
+    const handleUserViewDetail = (e)=>{
+        let userData = e.target.id.split(',');
+        let userId = userData[0];
+        router.push(`/admin/adminDashboard/users/${userId}`);
+    }
+
     return (
         <>
             <div className=" flex">
@@ -123,7 +130,7 @@ export default function User() {
                         <Button className=" w-20 h-11 flex justify-around hover:bg-green-700  bg-green-600  p-2 "><SortIcon className="" />  Sort</Button>
                     </div>
                     <div className="border-2 rounded-xl ml-20">
-                        <UserTable columnName={columnName} rowData={userInfo} />
+                        <UserTable columnName={columnName} rowData={userInfo} viewDetail={handleUserViewDetail}/>
                     </div>
                     <ToastContainer />
                 </div>
