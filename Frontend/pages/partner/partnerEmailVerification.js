@@ -47,8 +47,9 @@ export default function partnerEmailVerification() {
                 localStorage.setItem('token', jsonResponse.token)
                 localStorage.removeItem('partnerDetails')
                 toast.success(jsonResponse.message)
+                
                 setTimeout(() => {
-                    router.push('/partner/partnerDashboard');
+                    router.push('/partner/partnerOnboarding');
                 }, 2000)
 
             } else {

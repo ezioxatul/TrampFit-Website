@@ -70,7 +70,7 @@ export default function manageMembership() {
     }, [ischanged])
 
 
-    
+
     let [addMembership, setAddMembership] = useState(false);
     let [addMembershipData, setAddMembershipData] = useState({
         membershipName: "",
@@ -84,6 +84,7 @@ export default function manageMembership() {
         amount: "",
         validity: "",
         description: "",
+        session: "",
         status: ""
     });
 
@@ -161,6 +162,7 @@ export default function manageMembership() {
         addMembershipData.amount = planinfo[2]
         addMembershipData.validity = planinfo[3];
         addMembershipData.description = planinfo[4];
+        addMembershipData.session = planinfo[5];
 
         setAddMembershipData({ ...addMembershipData });
         setPlanId(planinfo[0]);
@@ -250,6 +252,7 @@ export default function manageMembership() {
         viewDetail.validity = viewDetailArray[2];
         viewDetail.description = viewDetailArray[3];
         viewDetail.status = viewDetailArray[4];
+        viewDetail.session = viewDetailArray[5];
 
         setViewDetail({ ...viewDetail });
 
@@ -315,13 +318,17 @@ export default function manageMembership() {
                                                         <h1 className="text-sm text-red-600 bg-red-100  text-center w-24 pt-0.5 h-[1.7rem] rounded-lg">{info.status}</h1>
                                                 }
                                             </div>
-                                            <h1 className="text-sm text-gray-400 ml-4 mt-4">Validity : {info.validity}</h1>
+                                            <div className="flex justify-between">
+                                                <h1 className="text-sm text-gray-400 ml-4 mt-4">Validity : {info.validity}</h1>
+                                                <h1 className="text-sm text-gray-400 ml-4 mr-5 mt-6">Session : {info.session}</h1>
+                                            </div>
+
                                             <div className=" flex justify-between ml-4 mr-4 mt-6">
                                                 <div className=" flex space-x-4">
                                                     {
                                                         info.status === "Active" ?
                                                             <>
-                                                                <p className=" cursor-pointer text-xs rounded-lg text-yellow-500 bg-yellow-100  p-2 w-20 text-center" id={`${info.id}+${info.membershipName}+${info.amount}+${info.validity}+${info.description}`} onClick={updatePlanHandler}>EDIT PLAN</p>
+                                                                <p className=" cursor-pointer text-xs rounded-lg text-yellow-500 bg-yellow-100  p-2 w-20 text-center" id={`${info.id}+${info.membershipName}+${info.amount}+${info.validity}+${info.description}+${info.session}`} onClick={updatePlanHandler}>EDIT PLAN</p>
                                                                 <p className=" cursor-pointer text-xs rounded-lg text-red-600 bg-red-100 p-2 w-20 text-center" id={info.id} onClick={deactivatedPlanHandler}>DELETE</p>
                                                             </> :
                                                             <>
@@ -331,7 +338,7 @@ export default function manageMembership() {
                                                     }
 
                                                 </div>
-                                                <p className=" cursor-pointer text-xs rounded-lg text-green-600 border-green-600 border p-2" id={`${info.membershipName}+${info.amount}+${info.validity}+${info.description}+${info.status}`} onClick={handleViewDetail}>VIEW PLAN DETAILS</p>
+                                                <p className=" cursor-pointer text-xs rounded-lg text-green-600 border-green-600 border p-2" id={`${info.membershipName}+${info.amount}+${info.validity}+${info.description}+${info.status}+${info.session}`} onClick={handleViewDetail}>VIEW PLAN DETAILS</p>
                                             </div>
                                         </div>
                                     );
@@ -344,7 +351,7 @@ export default function manageMembership() {
                         {/* view Plan Detail */}
 
                         <Dialog open={viewPlanDetail}>
-                            <DialogContent className="w-[35rem] h-72">
+                            <DialogContent className="w-[35rem] h-80">
                                 <p className=" cursor-pointer hover:text-green-600 transition text-center mt-[-1rem] float-right mr-[-1rem]" onClick={handleCloseViewDetail}><CloseIcon /></p>
                                 <div className=" flex justify-between ml-4 mr-4 mt-4">
                                     <p className="text-2xl text-green-600">{viewDetail.name}</p>
@@ -363,6 +370,11 @@ export default function manageMembership() {
                                 <div className=" flex justify-between mr-5 space-x-2 mt-5">
                                     <p className="ml-4 text-green-600">Validity</p>
                                     <p className="ml-4 text-md text-gray-400"> {viewDetail.validity}</p>
+                                </div>
+
+                                <div className=" flex justify-between mr-5 space-x-2 mt-5">
+                                    <p className="ml-4 text-green-600">Session</p>
+                                    <p className="ml-4 text-md text-gray-400"> {viewDetail.session}</p>
                                 </div>
 
                                 <div className=" space-y-2 mr-4 mt-4">
