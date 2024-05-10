@@ -11,6 +11,11 @@ const gymDetailsModel = sequelize.define('gymDetails', {
     allowNull: false,
     required: true
   },
+  gymCity: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    required: true
+  },
   openingTime: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -32,12 +37,12 @@ const gymDetailsModel = sequelize.define('gymDetails', {
     required: true
   },
    gymDescription: {
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
         allowNull: false,
         required: true
     },
     gymQuestion: {
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
         allowNull: false,
         required: true
       },

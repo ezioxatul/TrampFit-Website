@@ -29,6 +29,7 @@ App.use('/handleWebhooks', express.raw({ type: 'application/json' }));
 App.use(bodyParser.json());
 App.use(bodyParser.urlencoded({ extended: false}))
 
+
 // Applying the Router
 App.use(userAuthenticateRouter);
 App.use(partnerAuthenticateRouter);
