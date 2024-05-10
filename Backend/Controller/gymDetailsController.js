@@ -2,11 +2,14 @@ const gymDetailsModel = require('../Models/gymDetailsModel');
 const partnerLoginModel = require('../Models/partnerLoginModel');
 const sequelize = require("../databaseConnection");
 const { where, Op } = require("sequelize");
+
+
 //Getting Gym Details
 const getGymDetailsController = async (req, res) => {
     try {
         let gymName = req.body.gymName;
         let gymLocation = req.body.gymLocation;
+        let gymCity = req.body.gymCity;
         let openingTime = req.body.openingTime;
         let closingTime = req.body.closingTime; 
         let gymDescription = req.body.gymDescription;
@@ -33,6 +36,7 @@ const getGymDetailsController = async (req, res) => {
         await gymDetailsModel.create({
             gymName: gymName,
             gymLocation: gymLocation,
+            gymCity: gymCity,
             openingTime: openingTime,
             closingTime: closingTime,
             gymDescription: gymDescription,
@@ -63,7 +67,22 @@ const getGymDetailsController = async (req, res) => {
     }
 }
 
+//checking the token
+const tokenCheckController = (req, res) => {
+    try {
+        res.json({
+            message: "Valid Partner",
+            response: true
+        })
+    } catch (err) {
+        res.json({
+            message: "Something went wrong",
+            response: false
+        })
+    }
+}
 
 
 
-module.exports = { getGymDetailsController }
+
+module.exports = { getGymDetailsController, tokenCheckController}

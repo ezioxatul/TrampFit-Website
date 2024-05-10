@@ -9,5 +9,7 @@ const uploadFunction = fileUpload.fields([{ name: 'gymLogo' }, { name: 'interior
 //Getting Gym Details
 router.post('/gymDetails', partnerSecretKey, jwtVerification, uploadFunction , gymDetailsController.getGymDetailsController);
 
+//checking for token
+router.get('/partnerTokenCheck',partnerSecretKey,jwtVerification,gymDetailsController.tokenCheckController);
 
 module.exports = router;

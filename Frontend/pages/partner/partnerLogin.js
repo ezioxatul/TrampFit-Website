@@ -132,7 +132,9 @@ const partnerLogin = () => {
         } else {
           toast.error(emailExistsResponse.message);
         }
-      } catch { }
+      } catch(err) {
+        console.log(err);
+       }
     }
   };
 
