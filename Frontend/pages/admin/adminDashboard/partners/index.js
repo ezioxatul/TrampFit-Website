@@ -10,6 +10,9 @@ import "react-toastify/dist/ReactToastify.css";
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
 import FilterAltOffIcon from '@mui/icons-material/FilterAltOff';
 import { useRouter } from "next/router";
+import Dialog from '@mui/material/Dialog';
+import DialogContent from '@mui/material/DialogContent';
+import CloseIcon from '@mui/icons-material/Close';
 
 export default function partners() {
     let router = useRouter();
@@ -22,6 +25,7 @@ export default function partners() {
     let [approvedSwitch, setApprovedSwitch] = useState(true);
     let [rejectedSwitch, setRejectedSwitch] = useState(true);
     let [handleFilterSwitch, setHandleFilterSwitch] = useState(false);
+    let [viewPartnerGymDetail, setViewPartnerGymDetail] = useState(false);
 
     let [statusFilter, setStatusFilter] = useState({
         pending: "",
@@ -255,6 +259,14 @@ export default function partners() {
         setStatusFilter({ ...statusFilter });
     }
 
+    const handlePartnerGymDetail = (e) => {
+        setViewPartnerGymDetail(true);
+    }
+
+    const closePartnerGymDetail = ()=> {
+        setViewPartnerGymDetail(false);
+    }
+
 
     return (
         <>
@@ -291,8 +303,38 @@ export default function partners() {
                     }
 
                     <div className="border-2 rounded-xl ml-20">
-                        <UserTable columnName={columnName} rowData={partnerInfo} />
+                        <UserTable columnName={columnName} rowData={partnerInfo} viewDetail={handlePartnerGymDetail} />
                     </div>
+
+                    <Dialog open={viewPartnerGymDetail}>
+                        <DialogContent className="w-[35rem] h-[30rem] space-y-6">
+                        <p className=" cursor-pointer hover:text-green-600 transition text-center mt-[-1rem] float-right mr-[-1rem]" onClick={closePartnerGymDetail}><CloseIcon /></p>
+                            <div className="flex justify-between mt-5 ml-4 mr-4">
+                                <h1 className="text-green-600 text-xl flex">Dream Gym Fitness & spa</h1>
+                                <p className="text-sm text-yellow-500 bg-yellow-100  text-center w-20 pt-0.5 h-[1.7rem] rounded-lg mt-1">Pending</p>
+                            </div>
+                        
+                            <p className="text-green-600 ml-4">Timing  :<span className="text-gray-400"> 6:00 AM to 8:00 PM</span></p>
+                          
+                            <div className="ml-4 space-y-1">
+                                <p className=" text-green-600">Location :</p>
+                                <p className=" text-gray-400 ">Landmark-gurudwara
+                                    gursagar near suian wala
+                                    Hospital, sector 76,Mohali,
+                                    141008 </p>    
+                            </div>
+
+                            <div className="ml-4 space-y-1">
+                            <p className=" text-green-600">Description :</p>
+                                <p className=" text-gray-400 ">Gyms provide a one-stop shop for your fitness journey.
+                                 They typically have a variety of cardio and weightlifting equipment to suit different workout styles. 
+                                 For those who prefer personalized guidance, there's the option of 
+                                 hiring a personal trainer. Some gyms even
+                                  go the extra mile with amenities like saunas, 
+                                steam rooms, or childcare to make your workout experience more convenient and enjoyable. </p>    
+                            </div>
+                        </DialogContent>
+                    </Dialog>
                 </div>
                 <ToastContainer />
             </div>
