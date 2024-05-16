@@ -9,7 +9,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 import { useRouter } from "next/router";
-import userId from "./[userId]";
+
 
 export default function User() {
     let router = useRouter();
@@ -113,7 +113,14 @@ export default function User() {
     const handleUserViewDetail = (e)=>{
         let userData = e.target.id.split(',');
         let userId = userData[0];
-        router.push(`/admin/adminDashboard/users/${userId}`);
+        let userName = userData[1];
+        
+        router.push({
+            pathname : `/admin/adminDashboard/users/${userId}` ,
+            query : {
+                userName : userName
+            }
+        });
     }
 
     return (

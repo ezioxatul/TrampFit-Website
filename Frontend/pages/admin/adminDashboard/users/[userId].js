@@ -23,6 +23,7 @@ import { useRouter } from "next/router";
 export default function userId() {
     let router = useRouter();
     let userId = router.query.userId;
+    let userName = router.query.userName;
     let [openDetailMembershipInfo, setOpenDetailMembershipInfo] = useState(false);
     let [membershipDetails, setMembershipDetails] = useState([]);
     let [activeMembershipExists, setActiveMembershipExists] = useState(false);
@@ -418,7 +419,7 @@ export default function userId() {
             <div className=" flex">
                 <AdminSideBar />
                 <div>
-                    <h1 className="ml-20 mt-8 text-3xl text-green-600 ">AADRASH KAUSHAL</h1>
+                    <h1 className="ml-20 mt-8 text-3xl text-green-600 ">{userName}</h1>
                     <div className="flex justify-center space-x-6 w-[60vw] mt-20 ml-20 h-20 ">
                         <h1 className={`text-md  ml-20  ${sessionStyle.bgColor} ${sessionStyle.textColor} ${sessionStyle.border} h-12  pt-2.5 inline-block text-center w-56 rounded-md cursor-pointer`} onClick={handleSessionStyle}>Session Booking History</h1>
                         <h1 className={`${membershipStyle.textColor} text-md  ml-20 ${membershipStyle.border} ${membershipStyle.bgColor} h-12 pt-2.5 text-center w-56 rounded-md cursor-pointer`} onClick={handleMembershipStyle}>Membership History</h1>
@@ -445,14 +446,14 @@ export default function userId() {
                                                             <CurrencyRupeeIcon className="h-6 w-6 mt-2 mr-2  text-green-600" />
                                                             <p className="text-md  text-gray-400 mt-2">{activeMembershipDetails.paidAmount}</p>
                                                         </div>
-                                                        <p className="text-green-600 float-right mr-2 mt-5">{activeMembershipDetails.status}</p>
+                                                        <p className="text-green-600 float-right mr-[13rem] mt-5">{activeMembershipDetails.status}</p>
                                                     </div>
 
                                                     <div className="flex ml-[-2rem] mt-3">
                                                         <DateRangeIcon className="h-6 w-6 mt-2 mr-2  text-green-600" />
                                                         <div className="flex ">
                                                             <h1 className="text-md  text-gray-400 mt-2">{activeMembershipDetails.startDate} To {activeMembershipDetails.endDate}</h1>
-                                                            <h1 className=" text-md text-green-600 ml-[40rem] mr-2 mt-2 hover:text-green-700 cursor-pointer" id={`
+                                                            <h1 className=" text-md text-green-600 ml-[30rem] mr-2 mt-2 hover:text-green-700 cursor-pointer" id={`
                                                             ${activeMembershipDetails.subscriptionId},${activeMembershipDetails.subscriptionName},
                                                             ${activeMembershipDetails.paidAmount},${activeMembershipDetails.startDate},${activeMembershipDetails.endDate},${activeMembershipDetails.status},${activeMembershipDetails.downloadInvoice}`} onClick={handleOpenMembershipDetails}>View Details</h1>
                                                         </div>

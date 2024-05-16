@@ -26,6 +26,8 @@ export default function partners() {
     let [rejectedSwitch, setRejectedSwitch] = useState(true);
     let [handleFilterSwitch, setHandleFilterSwitch] = useState(false);
     let [viewPartnerGymDetail, setViewPartnerGymDetail] = useState(false);
+    let [partnerStatus,setPartnerStatus] = useState();
+    let [partnerGymData,setPartnerGymData] = useState();
 
     let [statusFilter, setStatusFilter] = useState({
         pending: "",
@@ -78,7 +80,7 @@ export default function partners() {
                             let newPartnerData = [];
 
                             partnerInfo.data.map((val) => {
-                                let partnerData = Object.values(val);
+                                let partnerData = Object.values(val.partnerInfo);
                                 partnerData.push('View Detail');
                                 newPartnerData.push(partnerData);
                             })
@@ -259,14 +261,47 @@ export default function partners() {
         setStatusFilter({ ...statusFilter });
     }
 
-    const handlePartnerGymDetail = (e) => {
+    const handlePartnerGymDetail = async(e) => {
+        let partnerDetails = e.target.id.split(',');
+        let partnerId = partnerDetails[0];
+
+        setPartnerStatus(partnerDetails[4]);
+
+        try {
+
+            let token = localStorage.getItem("adminToken");
+            if(!token) {
+                router.push('/admin');
+            } else {
+                const option = {
+                    method : "GET",
+                    headers : {
+                        Authorization : `Bearer ${token}`
+                    }
+                }
+
+                let gymDetails = await fetch(`http://localhost/adminDashboard/getPartnersGymDetails?partnerId=${partnerId}`,option);
+                gymDetails = await gymDetails.json();
+
+                if(gymDetails.response) {
+                    setPartnerGymData(gymDetails.data);
+                } else {
+                    toast.error(gymDetails.message);
+                }
+            }
+
+        } catch(err) {
+
+            console.log(err);
+
+        }
+
         setViewPartnerGymDetail(true);
     }
 
     const closePartnerGymDetail = ()=> {
         setViewPartnerGymDetail(false);
     }
-
 
     return (
         <>
@@ -310,28 +345,26 @@ export default function partners() {
                         <DialogContent className="w-[35rem] h-[30rem] space-y-6">
                         <p className=" cursor-pointer hover:text-green-600 transition text-center mt-[-1rem] float-right mr-[-1rem]" onClick={closePartnerGymDetail}><CloseIcon /></p>
                             <div className="flex justify-between mt-5 ml-4 mr-4">
-                                <h1 className="text-green-600 text-xl flex">Dream Gym Fitness & spa</h1>
-                                <p className="text-sm text-yellow-500 bg-yellow-100  text-center w-20 pt-0.5 h-[1.7rem] rounded-lg mt-1">Pending</p>
+                                <h1 className="text-green-600 text-xl flex">{viewPartnerGymDetail && partnerGymData.gymName}</h1>
+                                {   partnerStatus === "Approved" ?
+                                    <p className="text-sm text-green-600 bg-green-100  text-center w-20 pt-0.5 h-[1.7rem] rounded-lg mt-1">{viewPartnerGymDetail && partnerStatus}</p>
+                                    : partnerStatus === "Rejected" ?
+                                    <p className="text-sm text-red-600 bg-red-100  text-center w-20 pt-0.5 h-[1.7rem] rounded-lg mt-1">{viewPartnerGymDetail && partnerStatus}</p>
+                                    :
+                                    <p className="text-sm text-yellow-500 bg-yellow-100  text-center w-20 pt-0.5 h-[1.7rem] rounded-lg mt-1">{viewPartnerGymDetail && partnerStatus}</p>
+                                }
                             </div>
                         
-                            <p className="text-green-600 ml-4">Timing  :<span className="text-gray-400"> 6:00 AM to 8:00 PM</span></p>
+                            <p className="text-green-600 ml-4">Timing  :<span className="text-gray-400"> {viewPartnerGymDetail && partnerGymData.openingTime} AM to {viewPartnerGymDetail && partnerGymData.closingTime} PM</span></p>
                           
                             <div className="ml-4 space-y-1">
                                 <p className=" text-green-600">Location :</p>
-                                <p className=" text-gray-400 ">Landmark-gurudwara
-                                    gursagar near suian wala
-                                    Hospital, sector 76,Mohali,
-                                    141008 </p>    
+                                <p className=" text-gray-400 ">{viewPartnerGymDetail && partnerGymData.gymLocation} , {viewPartnerGymDetail && partnerGymData.gymCity}</p>    
                             </div>
 
                             <div className="ml-4 space-y-1">
                             <p className=" text-green-600">Description :</p>
-                                <p className=" text-gray-400 ">Gyms provide a one-stop shop for your fitness journey.
-                                 They typically have a variety of cardio and weightlifting equipment to suit different workout styles. 
-                                 For those who prefer personalized guidance, there's the option of 
-                                 hiring a personal trainer. Some gyms even
-                                  go the extra mile with amenities like saunas, 
-                                steam rooms, or childcare to make your workout experience more convenient and enjoyable. </p>    
+                                <p className=" text-gray-400 ">{viewPartnerGymDetail && partnerGymData.gymDescription}</p>    
                             </div>
                         </DialogContent>
                     </Dialog>

@@ -13,8 +13,8 @@ const sequelizeAssociations =  () => {
     userSignupModel.hasMany(paymentDetailModel, { foreignKey: "userId", as: "paymentInfo",onDelete : "CASCADE" });
     paymentDetailModel.belongsTo(userSignupModel, { foreignKey: "userId", as: "paymentInfo" });
 
-    partnerLoginModel.hasOne(gymDetailsModel, { foreignKey: "partnerId", as: "gymInfo" });
-    gymDetailsModel.belongsTo(partnerLoginModel, { foreignKey: "partnerId", as: "gymInfo" });
+    partnerLoginModel.hasOne(gymDetailsModel, { foreignKey: "partnerId", as: "partnerInfo" });
+    gymDetailsModel.belongsTo(partnerLoginModel, { foreignKey: "partnerId", as: "partnerInfo" });
 }
 
 sequelize.sync({ alter: false }).then((res) => {
