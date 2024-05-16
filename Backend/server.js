@@ -9,6 +9,7 @@ const adminLoginRouter = require('./Routes/adminAuthentication');
 const adminDashboardRouter = require('./Routes/adminDashboardRoutes');
 const membershipRoutes = require('./Routes/membershipRoutes');
 const gymDetailsRoutes = require('./Routes/gymDetailsRoutes');
+const browseGymRoutes = require('./Routes/browseGymRoutes');
 const sequelizeAssociations = require('./sequelizeAssociations')();
 
 
@@ -38,6 +39,7 @@ App.use(adminLoginRouter);
 App.use(adminDashboardRouter);
 App.use(membershipRoutes);
 App.use(gymDetailsRoutes);
+App.use(browseGymRoutes);
 
 App.listen(process.env.PORT,()=>{
     console.log("local Server Started on Port "+process.env.PORT);

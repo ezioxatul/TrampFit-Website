@@ -6,8 +6,51 @@ import LocationCityIcon from '@mui/icons-material/LocationCity';
 import { Separator } from "@/components/ui/separator";
 import CurrencyRupeeIcon from '@mui/icons-material/CurrencyRupee';
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import HeatPumpIcon from '@mui/icons-material/HeatPump';
+import { useRouter } from "next/router";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import Popup from "@/components/Popup";
+import { loadStripe } from '@stripe/stripe-js';
+
+export async function getStaticPaths() {
+    const res = await fetch('http://localhost/browseGym', { method: "GET" });
+    const getAllGymDetails = await res.json();
+
+    // Get the paths we want to pre-render based on gymIds
+    const paths = getAllGymDetails.data.map(val => ({
+        params: { gymId: val.id.toString() }, // Make sure to use gymId instead of id
+    }));
+
+    // Return the paths we want to pre-render
+    return { paths, fallback: false };
+}
+
+export async function getStaticProps({ params }) {
+    // Fetch data for the specific gym using params.gymId
+    const res = await fetch(`http://localhost/browseGym/gymViewDetail?gymId=${params.gymId}`, { method: "GET" });
+    const gymViewDetail = await res.json();
+    // Pass gym data as props
+
+    let gymLogo = gymViewDetail.data.gymLogo;
+    gymLogo = gymLogo.substring(18);
+    let gymResult = gymLogo.replace(/\\/g, '/')
+    gymViewDetail.data.gymLogo = gymResult
+
+    let interiorPhoto = gymViewDetail.data.interiorPhoto;
+    interiorPhoto = interiorPhoto.substring(18);
+    let interiorResult = interiorPhoto.replace(/\\/g, '/')
+    gymViewDetail.data.interiorPhoto = interiorResult
+
+    return {
+        props: {
+            gymViewDetail,
+        },
+    };
+}
+
+
 const calculateDay = (currentDay) => {
     let latestDay = "";
     switch (currentDay) {
@@ -65,13 +108,53 @@ const calculateSevenDay = (currentDate) => {
     finalReservation.push(reserveDay);
     return finalReservation;
 }
-export default function gymDetail() {
+export default function gymDetail({ gymViewDetail }) {
+
     let currentDate = new Date();
     let reserveWorkout = calculateSevenDay(currentDate);
 
-    let selectPlan = [['1278.72', '2046.72', '5118.72'], ['1 Month', '1 Month', '3 Month']]
+    let [membershipData, setMembershipData] = useState([]);
+    let [payableAmount, setPayableAmount] = useState();
+    let [nextStart, setNextStart] = useState(false);
 
+    let [membershipDetails, setMembershipDetails] = useState({
+        membershipId: "",
+        membershipPlan: "",
+        selectPlanValidity: "",
+        payableAmount: "",
+        planDescription: ""
+    })
+    let [start, setStart] = useState(false);
 
+    let [subscriptionId, setSubscriptionId] = useState();
+
+    useEffect(() => {
+        try {
+
+            fetch('http://localhost/getActiveMembership', { method: "GET" }).then(async (res) => {
+
+                let membershipData = await res.json();
+                setPayableAmount(membershipData.data[0].amount)
+
+                membershipDetails.membershipId = membershipData.data[0].id
+                membershipDetails.membershipPlan = membershipData.data[0].membershipName
+                membershipDetails.selectPlanValidity = membershipData.data[0].validity
+                membershipDetails.payableAmount = membershipData.data[0].amount
+                membershipDetails.planDescription = membershipData.data[0].description
+
+                setMembershipDetails({ ...membershipDetails });
+
+                setMembershipData(membershipData.data)
+
+            }).catch((err) => {
+                console.log(err);
+            })
+
+        } catch (err) {
+            console.log(err);
+        }
+
+    }, [])
 
     let [firstPlanStyle, setFirstPlanStyle] = useState({
         textColor: "text-white",
@@ -90,7 +173,7 @@ export default function gymDetail() {
 
     let [changePara, setChangePara] = useState(false);
     let [changeInfo, setChangeInfo] = useState(false);
-    let [payableAmount, setPayableAmount] = useState("1278.72")
+
 
     let [firstPara, setFirstPara] = useState({
         fontSize: "font-semibold",
@@ -144,9 +227,18 @@ export default function gymDetail() {
 
 
 
-    const firstPlan = () => {
+    const firstPlan = (i) => {
         setChangeInfo(false)
-        setPayableAmount(selectPlan[0][0])
+
+        membershipDetails.membershipId = membershipData[i].id;
+        membershipDetails.membershipPlan = membershipData[i].membershipName;
+        membershipDetails.selectPlanValidity = membershipData[i].validity;
+        membershipDetails.payableAmount = membershipData[i].amount;
+        membershipDetails.planDescription = membershipData[i].description;
+
+        setMembershipDetails({ ...membershipDetails });
+
+        setPayableAmount(membershipData[0].amount)
 
         firstPlanStyle.textColor = "text-white"
         firstPlanStyle.bgColor = "bg-green-600"
@@ -164,9 +256,18 @@ export default function gymDetail() {
         setThirdPlanStyle({ ...thirdPlanStyle })
     }
 
-    const secondPlan = () => {
+    const secondPlan = (i) => {
         setChangeInfo(true)
-        setPayableAmount(selectPlan[0][1])
+
+        membershipDetails.membershipId = membershipData[i].id;
+        membershipDetails.membershipPlan = membershipData[i].membershipName;
+        membershipDetails.selectPlanValidity = membershipData[i].validity;
+        membershipDetails.payableAmount = membershipData[i].amount;
+        membershipDetails.planDescription = membershipData[i].description;
+
+        setMembershipDetails({ ...membershipDetails });
+
+        setPayableAmount(membershipData[1].amount)
 
         secondPlanStyle.textColor = "text-white"
         secondPlanStyle.bgColor = "bg-green-600"
@@ -185,9 +286,17 @@ export default function gymDetail() {
     }
 
 
-    const thirdPlan = () => {
+    const thirdPlan = (i) => {
         setChangeInfo(true)
-        setPayableAmount(selectPlan[0][2])
+        membershipDetails.membershipId = membershipData[i].id;
+        membershipDetails.membershipPlan = membershipData[i].membershipName;
+        membershipDetails.selectPlanValidity = membershipData[i].validity;
+        membershipDetails.payableAmount = membershipData[i].amount;
+        membershipDetails.planDescription = membershipData[i].description;
+
+        setMembershipDetails({ ...membershipDetails });
+
+        setPayableAmount(membershipData[2].amount)
 
         thirdPlanStyle.textColor = "text-white"
         thirdPlanStyle.bgColor = "bg-green-600"
@@ -205,6 +314,87 @@ export default function gymDetail() {
         setSecondPlanStyle({ ...secondPlanStyle });
 
     }
+    const notConfirmed = () => {
+        setNextStart(false);
+    }
+
+    const openConfirmation = () => {
+        setNextStart(true);
+    }
+
+    const handlePayment = async () => {
+        setNextStart(false);
+        const stripePromise = await loadStripe(process.env.payment_gateway_publish_key);
+
+        try {
+            let token = localStorage.getItem("token");
+
+            if (token) {
+                const option = {
+                    method: "POST",
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`
+                    },
+                    body: JSON.stringify(membershipDetails)
+                }
+
+                let paymentResponse = await fetch('http://localhost/createSubscription', option);
+                paymentResponse = await paymentResponse.json();
+
+                if (paymentResponse.response) {
+                    if (paymentResponse.sessionId) {
+
+                        stripePromise.redirectToCheckout({
+                            sessionId: paymentResponse.sessionId,
+                        });
+
+                    } else {
+
+                        setStart(true);
+                        setSubscriptionId(paymentResponse.subscriptionId);
+                    }
+                } else {
+                    toast.error(paymentResponse.message);
+                    setTimeout(() => {
+                        router.push('/browseGym');
+                    }, 3000);
+                }
+            } else {
+                router.push('/login')
+            }
+
+
+        } catch (err) {
+            console.log(err);
+        }
+
+    }
+
+    const handleClose = () => {
+        setStart(false);
+    }
+
+    const handleDelete = async () => {
+        try {
+            const option = {
+                method: "DELETE"
+            }
+            let response = await fetch(`http://localhost/cancelSubscription?subscriptionId=${subscriptionId}`, option);
+            response = await response.json();
+
+            if (response.response) {
+                setStart(false);
+                toast.success("Plan has no more Exists");
+            } else {
+                toast.error("Something Went wrong !!");
+            }
+
+        } catch (err) {
+            console.log(err);
+        }
+    }
+
 
     return (
         <>
@@ -213,10 +403,10 @@ export default function gymDetail() {
                 <div className="flex mt-10 ml-10 space-x-6">
                     <div className=" space-y-10 mb-20">
                         <div className=" w-[60rem] h-56 border-2 rounded-sm mb-5 ">
-                            <h1 className=" text-4xl font-semibold mt-3 ml-5">Dream Gym Fitness & spa</h1>
+                            <h1 className=" text-3xl font-semibold mt-3 ml-5">{gymViewDetail.data.gymName}</h1>
                             <div className="flex ml-5 mt-5 space-x-8">
                                 <Image
-                                    src="/gymname.png" // Path to your image
+                                    src={gymViewDetail.data.gymLogo} // Path to your image
                                     alt="Description of the image" // Description of the image for accessibility
                                     width={100} // Reduced width of the image
                                     height={150} // Reduced height of the image
@@ -227,7 +417,7 @@ export default function gymDetail() {
                                         <AccessTimeFilledIcon className=" text-gray-400" />
                                         <p className=" text-md font-semibold">Opening Time</p>
                                     </div>
-                                    <p className="text-lg ml-12 font-semibold">06:30-20:00</p>
+                                    <p className="text-lg ml-12 font-semibold">{gymViewDetail.data.openingTime}-{gymViewDetail.data.closingTime}</p>
                                 </div>
 
                                 <div className="w-16 h-16 bg-green-600 rounded-md pt-2">
@@ -240,10 +430,8 @@ export default function gymDetail() {
                                         <LocationCityIcon className=" text-gray-400" />
                                         <p className=" text-md font-semibold">Location</p>
                                     </div>
-                                    <p className="text-md">Landmark-gurudwara</p>
-                                    <p className="text-md">gursagar near suian wala</p>
-                                    <p className="text-md">Hospital, sector 76,Mohali,</p>
-                                    <p className="text-md">141008</p>
+                                    <p className="text-md">{gymViewDetail.data.gymLocation}</p>
+                                    <p className="text-md">{gymViewDetail.data.gymCity}</p>
                                 </div>
                             </div>
                         </div>
@@ -304,34 +492,34 @@ export default function gymDetail() {
                                 <div className="flex ml-2  mt-5">
                                     <p className="h-8 w-28 text-xs border font-semibold text-center pt-2 rounded-sm ml-4">BASIC PLAN</p>
                                     <p className="h-8 w-28 text-xs bg-orange-400 text-white  font-semibold text-center pt-2 rounded-sm ml-12">PREMIUM</p>
-                                    <p className="h-8 w-28 text-xs border bg-orange-400 text-white font-semibold text-center pt-2 rounded-sm ml-12">PREMIUM</p>
+                                    <p className="h-8 w-28 text-xs border bg-orange-400 text-white font-semibold text-center pt-2 rounded-sm ml-12">Prime</p>
                                 </div>
                                 <div className="flex space-x-5 ml-2 mr-2 mt-4">
                                     {
-                                        selectPlan[0].map((val, i) => {
+                                        membershipData.map((val, i) => {
                                             return (
                                                 i === 0 ?
-                                                    <div className={`w-36 h-28 border-2 rounded-lg border-green-600 ${firstPlanStyle.bgColor} pt-7 cursor-pointer`} onClick={firstPlan}>
+                                                    <div className={`w-36 h-28 border-2 rounded-lg border-green-600 ${firstPlanStyle.bgColor} pt-7 cursor-pointer`} onClick={() => { firstPlan(i) }}>
                                                         <div className="flex justify-center">
                                                             <CurrencyRupeeIcon className={`text-lg ${firstPlanStyle.textColor} mt-0.5`} />
-                                                            <p className={`font-bold ${firstPlanStyle.textColor}`}>{val}</p>
+                                                            <p className={`font-bold ${firstPlanStyle.textColor}`}>{val.amount}</p>
                                                         </div>
-                                                        <p className={`text-center ${firstPlanStyle.textColor}`}>{selectPlan[1][i]}</p>
+                                                        <p className={`text-center ${firstPlanStyle.textColor}`}>{val.validity}</p>
                                                     </div> :
                                                     i === 1 ?
-                                                        <div className={`w-36 h-28 border-2 rounded-lg border-green-600  ${secondPlanStyle.bgColor} pt-7 cursor-pointer`} onClick={secondPlan}>
+                                                        <div className={`w-36 h-28 border-2 rounded-lg border-green-600  ${secondPlanStyle.bgColor} pt-7 cursor-pointer`} onClick={() => { secondPlan(i) }}>
                                                             <div className="flex justify-center">
                                                                 <CurrencyRupeeIcon className={`text-lg ${secondPlanStyle.textColor} mt-0.5`} />
-                                                                <p className={`font-bold ${secondPlanStyle.textColor} `}>{val}</p>
+                                                                <p className={`font-bold ${secondPlanStyle.textColor} `}>{val.amount}</p>
                                                             </div>
-                                                            <p className={`text-center ${secondPlanStyle.textColor}`}>{selectPlan[1][i]}</p>
+                                                            <p className={`text-center ${secondPlanStyle.textColor}`}>{val.validity}</p>
                                                         </div> :
-                                                        <div className={`w-36 h-28 border-2 rounded-lg border-green-600 ${thirdPlanStyle.bgColor} pt-7 cursor-pointer`} onClick={thirdPlan}>
+                                                        <div className={`w-36 h-28 border-2 rounded-lg border-green-600 ${thirdPlanStyle.bgColor} pt-7 cursor-pointer`} onClick={() => { thirdPlan(i) }}>
                                                             <div className="flex justify-center">
                                                                 <CurrencyRupeeIcon className={`text-lg mt-0.5 ${thirdPlanStyle.textColor}`} />
-                                                                <p className={`font-bold ${thirdPlanStyle.textColor}`}>{val}</p>
+                                                                <p className={`font-bold ${thirdPlanStyle.textColor}`}>{val.amount}</p>
                                                             </div>
-                                                            <p className={`text-center ${thirdPlanStyle.textColor} `}>{selectPlan[1][i]}</p>
+                                                            <p className={`text-center ${thirdPlanStyle.textColor} `}>{val.validity}</p>
                                                         </div>
                                             );
                                         })
@@ -349,13 +537,13 @@ export default function gymDetail() {
                                         <p className="text-green-600 font-semibold">{payableAmount}</p>
                                     </div>
                                 </div>
-                                <Button className=" h-12 w-[30rem] mt-10 rounded-md bg-green-600 text-white hover:bg-green-700" >PROCEED</Button>
+                                <Button className=" h-12 w-[30rem] mt-10 rounded-md bg-green-600 text-white hover:bg-green-700" onClick={openConfirmation}>PROCEED</Button>
                             </div>
                         </div>
                     </div>
                     <div className=" space-y-4 mb-10">
                         <Image
-                            src="/gymInfo.png" // Path to your image
+                            src={gymViewDetail.data.interiorPhoto} // Path to your image
                             alt="Description of the image" // Description of the image for accessibility
                             width={550} // Reduced width of the image
                             height={100} // Reduced height of the image
@@ -364,24 +552,17 @@ export default function gymDetail() {
                         <p className="text-2xl ml-5 font-semibold ">About us</p>
                         <Separator className="border-gray-400 w-[29rem] ml-5" />
                         <p className=" ml-5 " >
-                            Gyms provide a one-stop shop for your fitness journey.
-                            They typically have a variety of cardio and weightlifting equipment to suit different workout styles.
-                            For those who prefer personalized guidance, there's the option of hiring a personal trainer.
-                            Some gyms even go the extra mile with amenities like saunas, steam rooms,
-                            or childcare to make your workout experience more convenient and enjoyable.
+                            {gymViewDetail.data.gymDescription}
                         </p>
 
-                        <p className="text-3xl font-semibold ml-5">
-                            What will you achieve- Dream Gym Fitness & spa
+                        <p className="text-2xl font-semibold ml-5">
+                            What will you achieve- {gymViewDetail.data.gymName}
                         </p>
                         <Separator className="border-gray-400 w-[29rem] ml-5" />
                         <p className=" ml-5">
-                            With multiple options like Strength +
-                            Cardio, Body Weight and much more
-                            available in just one tap,achieving your
-                            fitness goals is now fun, convenient and easy.
+                            {gymViewDetail.data.gymQuestion}
                         </p>
-                        <p className="text-2xl ml-5 font-semibold">Amentity</p>
+                        <p className="text-2xl ml-5 font-semibold">Amenity</p>
                         <Separator className="border-gray-400 w-[29rem] ml-5" />
                         <div className="h-16 w-16 border ml-5 rounded-lg">
                             <HeatPumpIcon className="ml-[1.21rem] mt-4 text-md text-green-600 " />
@@ -389,7 +570,7 @@ export default function gymDetail() {
                         <p className="ml-7 text-sm ">Heater</p>
                         <p className="text-2xl ml-5 font-semibold">Studio Safety & Hygiene</p>
                         <Separator className="border-gray-400 w-[29rem] ml-5" />
-                        <ul className="ml-10 list-disc space-y-5 text-gray-400">  
+                        <ul className="ml-10 list-disc space-y-5 text-gray-400">
                             <li>
                                 This fitness studio ensures that the arena
                                 remains clean and hygenic for its visitors for a delightful experience.
@@ -408,7 +589,10 @@ export default function gymDetail() {
                                 any studio personnel.
                             </li>
                         </ul>
+                        {/* <ToastContainer /> */}
                     </div>
+                    <Popup open={nextStart} title={"Recurring payment Confirmation"} cancel="No" logout="Yes" logoutEvent={handlePayment} cancelEvent={notConfirmed} />
+                    <Popup open={start} contentItem={"Subscription Already exists"} title={"Do you want to cancel the subscription?"} cancel="close" logout="Delete" logoutEvent={handleDelete} cancelEvent={handleClose} />
                 </div>
                 <Footer />
             </div>

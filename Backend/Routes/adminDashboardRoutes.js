@@ -42,6 +42,23 @@ router.get('/adminDashboard/searchPartner',adminDashboardController.searchPartne
 
 router.get('/adminDashboard/filterPartner',adminDashboardController.filterPartnerController);
 
+// 4. get the gym Details of individual partners
+
+router.get('/adminDashboard/getPartnersGymDetails',adminSecretKey,jwtVerification,adminDashboardController.getPartnersGymDetailsController);
+
+// 5. get Partner Onboarding Data
+
+router.get('/adminDashboard/getPartnersOnboardingData',adminSecretKey,jwtVerification,adminDashboardController.getPartnersOnboardingDataController);
+
+// 6. Approved the partner
+router.put('/adminDashboard/partnerApproval',adminDashboardController.partnerApprovalController);
+
+// 7. reject the partner
+router.put('/adminDashboard/partnerRejected',adminDashboardController.partnerRejectedController);
+
+// 8. partner View Detail
+router.get('/adminDashboard/partnerViewDetail',adminSecretKey,jwtVerification,adminDashboardController.partnerViewDetailController);
+
 //adminDashboard ->  manage Membership
 
 // token check
