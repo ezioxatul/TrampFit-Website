@@ -1,6 +1,5 @@
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 
@@ -40,8 +39,8 @@ export default function Home() {
           <p className="text-2xl font-inter text-gray-600 mt-5">
             Dive into a World of Fitness and Fun with Every Jump.
           </p>
-          <Button className=" w-36 h-12 hover:bg-green-700 text-lg bg-green-600 mt-5 p-2" >
-            <Link href={"/about"}>Learn More</Link>
+          <Button className=" w-36 h-12 hover:bg-green-700 text-lg bg-green-600 mt-5 p-2">
+            Learn More
           </Button>
         </div>
         <div className="hero mr-4">

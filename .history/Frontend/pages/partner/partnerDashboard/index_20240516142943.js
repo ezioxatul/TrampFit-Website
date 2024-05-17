@@ -1,10 +1,7 @@
-import PartnerSideBar from '@/components/PartnerSideBar';
-
-
 export default function partnerDashboard() {
     return(
         <div>
-            <PartnerSideBar />
+            <h1>Partner Dashboard</h1>
         </div>  
     )
 }
