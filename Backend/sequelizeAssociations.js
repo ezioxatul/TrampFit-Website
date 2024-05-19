@@ -3,7 +3,7 @@ const partnerLoginModel = require('./Models/partnerLoginModel');
 const gymDetailsModel = require('./Models/gymDetailsModel');
 const userSignupModel = require('./Models/signUpModel')
 const paymentDetailModel = require('./Models/paymentDetailModel');
-
+const sessionModel = require('./Models/sessionModel');
 
 const sequelizeAssociations =  () => {
     // paymentDetail to userSignupModel
@@ -15,10 +15,13 @@ const sequelizeAssociations =  () => {
 
     partnerLoginModel.hasOne(gymDetailsModel, { foreignKey: "partnerId", as: "partnerInfo" });
     gymDetailsModel.belongsTo(partnerLoginModel, { foreignKey: "partnerId", as: "partnerInfo" });
+
+    gymDetailsModel.hasMany(sessionModel,{foreignKey : "gymId", as : "gymDetails"});
+    sessionModel.belongsTo(gymDetailsModel,{foreignKey : "gymId", as : "gymDetails"});
 }
 
 sequelize.sync({ alter: false }).then((res) => {
-    console.log("payment  Table created successfully");
+    console.log("association created successfully");
 }).catch((err) => {
     console.log(err);
     console.log("Some error has been occur while creating relation");
