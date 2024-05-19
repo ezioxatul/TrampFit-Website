@@ -56,7 +56,7 @@ const gymInfoController = async(req,res) => {
                     as : 'partnerInfo'
                 }
             ],
-            attributes : ['gymName','gymLocation','gymCity','id'],
+            attributes : ['gymName','gymLocation','gymCity','id','amenities'],
             where : {
                 '$partnerInfo.mobileNumber$' : mobileNumber
             }
@@ -94,8 +94,8 @@ const updateAmenitiesController = async (req, res) => {
         })
 
         res.json({
-            message: "Ammenities added successfully",
-            reponse: true
+            message: "Amenities added successfully",
+            response: true
         });
 
     } catch (err) {
