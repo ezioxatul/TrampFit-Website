@@ -19,4 +19,7 @@ router.post('/partnerDashboard/addSessionSlots',partnerDashboardController.addSe
 // update schedule slots
 router.put('/partnerDashboard/updateSchedule',partnerDashboardController.updateScheduleController);
 
+// get all slots
+router.get('/partnerDashboard/getAllSlots',partnerSecretKey,jwtVerification,partnerDashboardController.getAllSlotsController);
+
 module.exports = router;

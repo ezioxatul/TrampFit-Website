@@ -11,6 +11,7 @@ const membershipRoutes = require('./Routes/membershipRoutes');
 const gymDetailsRoutes = require('./Routes/gymDetailsRoutes');
 const browseGymRoutes = require('./Routes/browseGymRoutes');
 const partnerDashboardRoutes = require('./Routes/partnerDasboardRoutes');
+const sessionBookingModel = require('./Models/sessionBookingModel')
 const sequelizeAssociations = require('./sequelizeAssociations')();
 
 

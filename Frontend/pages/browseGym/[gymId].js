@@ -13,6 +13,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Popup from "@/components/Popup";
 import { loadStripe } from '@stripe/stripe-js';
+import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
 
 export async function getStaticPaths() {
     const res = await fetch('http://localhost/browseGym', { method: "GET" });
@@ -93,6 +94,8 @@ const calculateSevenDay = (currentDate) => {
 
     let nextDate = new Date(currentDate);
     let current = currentDate;
+
+
     reserveWorkout.push(current.getDate())
 
     reserveDay.push("/ " + calculateDay(current.getDay()));
@@ -103,15 +106,43 @@ const calculateSevenDay = (currentDate) => {
         reserveWorkout.push(nextDate.getDate())
         current = nextDate;
     }
+
+
+
     let finalReservation = [];
     finalReservation.push(reserveWorkout);
     finalReservation.push(reserveDay);
     return finalReservation;
 }
-export default function gymDetail({ gymViewDetail }) {
 
+const getTimeZone = () => {
+    let currentTimeZone = new Date();
+    let weeklyTimeZone = [new Date(currentTimeZone)];
+
+    for (let i = 1; i <= 6; i++) {
+        let nextDay = new Date(currentTimeZone);
+        nextDay.setDate(nextDay.getDate() + i);
+        weeklyTimeZone.push(nextDay);
+    }
+
+    return weeklyTimeZone;
+}
+
+
+export default function gymDetail({ gymViewDetail }) {
     let currentDate = new Date();
     let reserveWorkout = calculateSevenDay(currentDate);
+
+    let timeZoneArray = getTimeZone();
+
+    let router = useRouter();
+    let gymIdName = router.query.gymId;
+    let [dateSlot, setDateSlot] = useState(`${timeZoneArray[0].getDate()}/${timeZoneArray[0].getMonth() + 1}/${timeZoneArray[0].getFullYear()}`);
+    let [displaySlot, setDisplaySlot] = useState(false);
+    let [sessionTimingData, setSessionTimingData] = useState([]);
+
+    let [firstSlot, setFirstSlot] = useState();
+    let [secondSlot, setSecondSlot] = useState();
 
     let [membershipData, setMembershipData] = useState([]);
     let [payableAmount, setPayableAmount] = useState();
@@ -125,8 +156,10 @@ export default function gymDetail({ gymViewDetail }) {
         planDescription: ""
     })
     let [start, setStart] = useState(false);
+    let [reservingWorkout, setReserveWorkout] = useState(false);
 
     let [subscriptionId, setSubscriptionId] = useState();
+    let [bookedSlot, setBookedSlot] = useState({});
 
     useEffect(() => {
         try {
@@ -155,6 +188,35 @@ export default function gymDetail({ gymViewDetail }) {
         }
 
     }, [])
+
+
+    // get slot Data
+    useEffect(() => {
+        try {
+
+            const option = {
+                method: "GET"
+            }
+
+            fetch(`http://localhost/browseGym/gymViewDetail/getSessionSlots?gymId=${gymIdName}&date=${dateSlot}`, option).then(async (res) => {
+                let slotResponse = await res.json();
+
+                if (slotResponse.data.length > 0) {
+                    let finalIndex = slotResponse.data.length - 1;
+                    setSecondSlot(slotResponse.data[finalIndex].sessionTiming);
+                    setFirstSlot(slotResponse.data[0].sessionTiming);
+                }
+
+                setSessionTimingData(slotResponse.data);
+            }).catch((err) => {
+                console.log(err);
+            })
+
+        } catch (err) {
+            console.log(err);
+        }
+
+    }, [displaySlot])
 
     let [firstPlanStyle, setFirstPlanStyle] = useState({
         textColor: "text-white",
@@ -395,6 +457,99 @@ export default function gymDetail({ gymViewDetail }) {
         }
     }
 
+    // schedule the week
+
+    let [schedule, setSchedule] = useState("Day1");
+
+
+    const handleDayOne = (i) => {
+        setDateSlot(`${timeZoneArray[i].getDate()}/${timeZoneArray[i].getMonth() + 1}/${timeZoneArray[i].getFullYear()}`);
+        setSchedule("Day1");
+        setDisplaySlot(!displaySlot);
+    }
+
+    const handleDayTwo = (i) => {
+        setDateSlot(`${timeZoneArray[i].getDate()}/${timeZoneArray[i].getMonth() + 1}/${timeZoneArray[i].getFullYear()}`);
+        setSchedule("Day2");
+        setDisplaySlot(!displaySlot);
+    }
+    const handleDayThree = (i) => {
+        setDateSlot(`${timeZoneArray[i].getDate()}/${timeZoneArray[i].getMonth() + 1}/${timeZoneArray[i].getFullYear()}`);
+        setSchedule("Day3");
+        setDisplaySlot(!displaySlot);
+    }
+    const handleDayFour = (i) => {
+        setDateSlot(`${timeZoneArray[i].getDate()}/${timeZoneArray[i].getMonth() + 1}/${timeZoneArray[i].getFullYear()}`);
+        setSchedule("Day4");
+        setDisplaySlot(!displaySlot);
+    }
+    const handleDayFive = (i) => {
+        setDateSlot(`${timeZoneArray[i].getDate()}/${timeZoneArray[i].getMonth() + 1}/${timeZoneArray[i].getFullYear()}`);
+        setSchedule("Day5");
+        setDisplaySlot(!displaySlot);
+    }
+    const handleDaySix = (i) => {
+        setDateSlot(`${timeZoneArray[i].getDate()}/${timeZoneArray[i].getMonth() + 1}/${timeZoneArray[i].getFullYear()}`);
+        setSchedule("Day6");
+        setDisplaySlot(!displaySlot);
+    }
+    const handleDaySeven = (i) => {
+        setDateSlot(`${timeZoneArray[i].getDate()}/${timeZoneArray[i].getMonth() + 1}/${timeZoneArray[i].getFullYear()}`);
+        setSchedule("Day7");
+        setDisplaySlot(!displaySlot);
+    }
+
+    const cancelReservation = () => {
+        setReserveWorkout(false);
+    }
+
+    const confirmReservation = async () => {
+        try {
+
+            let userToken = localStorage.getItem("token");
+
+            if (!userToken) {
+                router.push("/login");
+            } else {
+
+                const body = {
+                    sessionId: bookedSlot.id,
+                    date: bookedSlot.date,
+                    time : bookedSlot.sessionTiming
+                }
+
+                const option = {
+                    method: "POST",
+                    headers: {
+                        Authorization: `Bearer ${userToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                    ,body: JSON.stringify(body)
+                }
+          
+
+                let slotBookingResponse = await fetch('http://localhost/browseGym/gymViewDetail/bookSlot', option);
+                slotBookingResponse = await slotBookingResponse.json();
+
+                if (slotBookingResponse.response) {
+                    toast.success(slotBookingResponse.message);
+                } else {
+                    toast.error(slotBookingResponse.message);
+                }
+
+            }
+
+        } catch (err) {
+            console.log(err);
+        }
+        setReserveWorkout(false);
+    }
+
+    const handleWorkoutReservation = (val) => {
+        setBookedSlot(val);
+        setReserveWorkout(true);
+    }
+
 
     return (
         <>
@@ -436,8 +591,8 @@ export default function gymDetail({ gymViewDetail }) {
                             </div>
                         </div>
 
-                        <div className=" w-[60rem] h-72 border-2 rounded-sm mb-5">
-                            <div className=" mt-3 mr-5 ml-5 space-y-4">
+                        <div className=" w-[60rem]  border-2 rounded-sm mb-5">
+                            <div className=" mt-3 mr-5 ml-5 mb-4 space-y-4">
                                 <p className=" text-md ">
                                     Try the best fitness classes and premium gyms with one pass to india's Largest Fitness Network
                                     at no extra cost. Simply choose and reserve your preferred slot to workout hassle-free
@@ -448,15 +603,65 @@ export default function gymDetail({ gymViewDetail }) {
                                     {
                                         reserveWorkout[0].map((val, i) => {
                                             return (
-                                                <div className="h-16 w-40 bg-gray-100 rounded-sm cursor-pointer">
-                                                    <p className="text-md text-center mt-3"><span className="font-bold text-2xl">{val}</span>{reserveWorkout[1][i]}</p>
-                                                </div>
+                                                i === 0 ?
+                                                    <div className={schedule === "Day1" ? "h-16 w-40 bg-green-600 rounded-sm cursor-pointer" : "h-16 w-40 bg-gray-100 rounded-sm cursor-pointer"} onClick={() => { handleDayOne(i) }}>
+                                                        <p className={schedule === "Day1" ? "text-md text-white text-center mt-3" : "text-md text-center mt-3"}><span className="font-bold text-2xl">{val}</span>{reserveWorkout[1][i]}</p>
+                                                    </div> :
+                                                    i === 1 ?
+                                                        <div className={schedule === "Day2" ? "h-16 w-40 bg-green-600 rounded-sm cursor-pointer" : "h-16 w-40 bg-gray-100 rounded-sm cursor-pointer"} onClick={() => { handleDayTwo(i) }}>
+                                                            <p className={schedule === "Day2" ? "text-md text-white text-center mt-3" : "text-md text-center mt-3"}><span className="font-bold text-2xl">{val}</span>{reserveWorkout[1][i]}</p>
+                                                        </div> :
+                                                        i === 2 ?
+                                                            <div className={schedule === "Day3" ? "h-16 w-40 bg-green-600 rounded-sm cursor-pointer" : "h-16 w-40 bg-gray-100 rounded-sm cursor-pointer"} onClick={() => { handleDayThree(i) }}>
+                                                                <p className={schedule === "Day3" ? "text-md text-white text-center mt-3" : "text-md text-center mt-3"}><span className="font-bold text-2xl">{val}</span>{reserveWorkout[1][i]}</p>
+                                                            </div> :
+                                                            i === 3 ?
+                                                                <div className={schedule === "Day4" ? "h-16 w-40 bg-green-600 rounded-sm cursor-pointer" : "h-16 w-40 bg-gray-100 rounded-sm cursor-pointer"} onClick={() => { handleDayFour(i) }}>
+                                                                    <p className={schedule === "Day4" ? "text-md text-white text-center mt-3" : "text-md text-center mt-3"}><span className="font-bold text-2xl">{val}</span>{reserveWorkout[1][i]}</p>
+                                                                </div> :
+                                                                i === 4 ?
+                                                                    <div className={schedule === "Day5" ? "h-16 w-40 bg-green-600 rounded-sm cursor-pointer" : "h-16 w-40 bg-gray-100 rounded-sm cursor-pointer"} onClick={() => { handleDayFive(i) }}>
+                                                                        <p className={schedule === "Day5" ? "text-md text-white text-center mt-3" : "text-md text-center mt-3"}><span className="font-bold text-2xl">{val}</span>{reserveWorkout[1][i]}</p>
+                                                                    </div> :
+                                                                    i === 5 ?
+                                                                        <div className={schedule === "Day6" ? "h-16 w-40 bg-green-600 rounded-sm cursor-pointer" : "h-16 w-40 bg-gray-100 rounded-sm cursor-pointer"} onClick={() => { handleDaySix(i) }}>
+                                                                            <p className={schedule === "Day6" ? "text-md text-white text-center mt-3" : "text-md text-center mt-3"}><span className="font-bold text-2xl">{val}</span>{reserveWorkout[1][i]}</p>
+                                                                        </div> :
+                                                                        <div className={schedule === "Day7" ? "h-16 w-40 bg-green-600 rounded-sm cursor-pointer" : "h-16 w-40 bg-gray-100 rounded-sm cursor-pointer"} onClick={() => { handleDaySeven(i) }}>
+                                                                            <p className={schedule === "Day7" ? "text-md text-white text-center mt-3" : "text-md text-center mt-3"}><span className="font-bold text-2xl">{val}</span>{reserveWorkout[1][i]}</p>
+                                                                        </div>
                                             );
                                         })
                                     }
 
                                 </div>
-                                <Separator className="border-gray-400" />
+                                <Separator className="border-gray-400 " />
+                            </div>
+                            <div className="w-[57.4rem]  bg-blue-50 ml-5 mt-3 mr-4 mb-4 flex">
+                                {
+                                    sessionTimingData.length > 0 &&
+                                    <div className="ml-16  mt-6 space-x-4 flex">
+                                        <FitnessCenterIcon className="border border-white rounded-md bg-white text-6xl p-2" />
+                                        <div className=" space-y-1">
+                                            <h1 className="font-semibold text-lg">Gym Workout</h1>
+                                            <h1 className="  text-blue-500">{firstSlot} - {secondSlot}</h1>
+                                        </div>
+                                    </div>
+                                }
+
+                                <div className="ml-20 mt-6 w-[35rem] gap-x-2 gap-y-3 mb-10 flex flex-wrap ">
+                                    {
+                                        sessionTimingData.length > 0 ?
+                                            sessionTimingData.map((val) => {
+                                                return (
+                                                    <div className="h-8 w-20 rounded-md border bg-white cursor-pointer" onClick={() => { handleWorkoutReservation(val) }}>
+                                                        <p className="text-center text-lg">{val.sessionTiming}</p>
+                                                    </div>
+                                                );
+                                            }) :
+                                            <h1 className="text-lg ml-60">Oop's no session has been added yet</h1>
+                                    }
+                                </div>
                             </div>
                         </div>
 
@@ -562,12 +767,60 @@ export default function gymDetail({ gymViewDetail }) {
                         <p className=" ml-5">
                             {gymViewDetail.data.gymQuestion}
                         </p>
-                        <p className="text-2xl ml-5 font-semibold">Amenity</p>
+                        <p className="text-2xl ml-5 font-semibold">Amenities</p>
                         <Separator className="border-gray-400 w-[29rem] ml-5" />
-                        <div className="h-16 w-16 border ml-5 rounded-lg">
-                            <HeatPumpIcon className="ml-[1.21rem] mt-4 text-md text-green-600 " />
+                        <div className="flex flex-wrap gap-x-2 gap-y-2">
+
+                            {
+                                gymViewDetail.data.amenities.map((val) => {
+                                    return (
+                                        val === "Air Conditioner" ?
+                                            <div className="space-y-2">
+                                                <div className=" w-20  border ml-5 rounded-md ">
+                                                    <img src="/air-conditioner.png" className=" mx-auto p-2" />
+                                                </div>
+                                                <p className="ml-7 text-sm text-center">{val}</p>
+                                            </div>
+                                            : val === "Wifi" ?
+                                                <div className="space-y-2">
+                                                    <div className=" w-20  border ml-5 rounded-md ">
+                                                        <img src="/wi-fi.png" className=" mx-auto p-2" />
+                                                    </div>
+                                                    <p className="ml-7 text-sm text-center">{val}</p>
+                                                </div> :
+                                                val === "Shower" ?
+                                                    <div className="space-y-2">
+                                                        <div className=" w-20  border ml-5 rounded-md ">
+                                                            <img src="/shower.png" className=" mx-auto p-2" />
+                                                        </div>
+                                                        <p className="ml-7 text-sm text-center">{val}</p>
+                                                    </div> :
+                                                    val === "Parking" ?
+                                                        <div className="space-y-2">
+                                                            <div className=" w-20  border ml-5 rounded-md ">
+                                                                <img src="/parking.png" className=" mx-auto p-2" />
+                                                            </div>
+                                                            <p className="ml-7 text-sm text-center">{val}</p>
+                                                        </div>
+                                                        : val === "Locker" ?
+                                                            <div className="space-y-2">
+                                                                <div className=" w-20  border ml-5 rounded-md ">
+                                                                    <img src="/lock.png" className=" mx-auto p-2" />
+                                                                </div>
+                                                                <p className="ml-7 text-sm text-center">{val}</p>
+                                                            </div> :
+                                                            <div className="space-y-2">
+                                                                <div className=" w-20  border ml-5 rounded-md ">
+                                                                    <img src="/cooler.png" className=" mx-auto p-2" />
+                                                                </div>
+                                                                <p className="ml-7 text-sm text-center">{val}</p>
+                                                            </div>
+                                    );
+                                })
+                            }
+
                         </div>
-                        <p className="ml-7 text-sm ">Heater</p>
+
                         <p className="text-2xl ml-5 font-semibold">Studio Safety & Hygiene</p>
                         <Separator className="border-gray-400 w-[29rem] ml-5" />
                         <ul className="ml-10 list-disc space-y-5 text-gray-400">
@@ -591,6 +844,7 @@ export default function gymDetail({ gymViewDetail }) {
                         </ul>
                         {/* <ToastContainer /> */}
                     </div>
+                    <Popup open={reservingWorkout} title={"Are you sure want to reserve workout?"} cancel="Cancel" logout="Reserve" logoutEvent={confirmReservation} cancelEvent={cancelReservation} />
                     <Popup open={nextStart} title={"Recurring payment Confirmation"} cancel="No" logout="Yes" logoutEvent={handlePayment} cancelEvent={notConfirmed} />
                     <Popup open={start} contentItem={"Subscription Already exists"} title={"Do you want to cancel the subscription?"} cancel="close" logout="Delete" logoutEvent={handleDelete} cancelEvent={handleClose} />
                 </div>

@@ -23,4 +23,5 @@ router.get('/getMembershipDetails',userSecretKey,jwtVerification,userDashboardCo
 // get the active membership If Yes
 router.get('/getActiveMembershipDetails',userSecretKey,jwtVerification,userDashboardController.getActiveMembershipController);
 
+
 module.exports = router;

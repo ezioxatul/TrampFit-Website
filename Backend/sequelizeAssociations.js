@@ -4,9 +4,9 @@ const gymDetailsModel = require('./Models/gymDetailsModel');
 const userSignupModel = require('./Models/signUpModel')
 const paymentDetailModel = require('./Models/paymentDetailModel');
 const sessionModel = require('./Models/sessionModel');
+const sessionBookingModel = require('./Models/sessionBookingModel')
 
 const sequelizeAssociations =  () => {
-    // paymentDetail to userSignupModel
     paymentDetailModel.hasMany(userSignupModel, { foreignKey: "MembershipId", as: "userInfo" });
     userSignupModel.belongsTo(paymentDetailModel, { foreignKey: "MembershipId", as: "userInfo" });
 
@@ -18,6 +18,14 @@ const sequelizeAssociations =  () => {
 
     gymDetailsModel.hasMany(sessionModel,{foreignKey : "gymId", as : "gymDetails"});
     sessionModel.belongsTo(gymDetailsModel,{foreignKey : "gymId", as : "gymDetails"});
+
+    sessionModel.hasMany(sessionBookingModel,{foreignKey : "sessionId" , as : "sessionInfo"});
+    sessionBookingModel.belongsTo(sessionModel,{foreignKey : "sessionId" , as : "sessionInfo"});
+
+    userSignupModel.hasMany(sessionBookingModel,{foreignKey : "userId",as : "userDetails"});
+    sessionBookingModel.belongsTo(userSignupModel,{foreignKey : "userId",as : "userDetails"});
+
+
 }
 
 sequelize.sync({ alter: false }).then((res) => {

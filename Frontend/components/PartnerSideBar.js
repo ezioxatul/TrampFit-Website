@@ -23,16 +23,17 @@ export default function PartnerSideBar() {
         setStart(!start);
     }
 
-
     const logoutEvent = () => {
         localStorage.removeItem('partnerToken');
         setStart(false);
         router.push('/partner/partnerLogin')
     }
+
+
     return (
         <>
             <div className=" w-72  m-[-8px] p-1  mb-10">
-                <Link href="#"><h1 className=' text-green-600 text-3xl font-semibold text-center mt-8 cursor-pointer'>TrampFit</h1></Link>
+                <Link href="/partner/partnerDashboard"><h1 className=' text-green-600 text-3xl font-semibold text-center mt-8 cursor-pointer'>TrampFit</h1></Link>
 
                 <List className='bg-white mt-8 ml-6 space-y-2'>
                     {
@@ -63,18 +64,12 @@ export default function PartnerSideBar() {
                                                     <ListItemText primary={text} />
                                                 </ListItemButton>
                                             </Link> :
-                                            index === 3 ?
-                                                <Link href="#">
-                                                    <ListItemButton className=' space-x-4 hover:bg-green-100 hover:rounded-2xl hover:text-green-600'>
-                                                        <ReceiptIcon className='text-2xl' />
-                                                        <ListItemText primary={text} />
-                                                    </ListItemButton>
-                                                </Link> :
-                                                <ListItemButton className=' space-x-4 hover:bg-green-100 hover:rounded-2xl hover:text-green-600' onClick={logout}>
-                                                    <LogoutIcon className='text-2xl' />
-                                                    <ListItemText primary={text} />
-                                                    <Popup open={start} title={"Do you Really want to Logout?"} cancel="Cancel" logout="Logout" logoutEvent={logoutEvent} cancelEvent={logout} />
-                                                </ListItemButton>
+                                            <ListItemButton className=' space-x-4 hover:bg-green-100 hover:rounded-2xl hover:text-green-600' onClick={logout}>
+                                                <LogoutIcon className='text-2xl' />
+                                                <ListItemText primary={text} />
+                                                <Popup open={start} title={"Do you Really want to Logout?"} cancel="Cancel" logout="Logout" logoutEvent={logoutEvent} cancelEvent={logout} />
+                                            </ListItemButton>
+
                             )
                         })
                     }

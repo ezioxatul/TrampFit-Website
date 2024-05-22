@@ -74,6 +74,10 @@ const gymDetailsModel = sequelize.define('gymDetails', {
     amenities : {
       type : DataTypes.ARRAY(DataTypes.STRING),
       allowNull : true,
+    },
+    totalSessionCapacity : {
+      type : DataTypes.INTEGER,
+      allowNull : true,
     }
   
 }, {

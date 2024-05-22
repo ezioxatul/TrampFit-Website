@@ -1,4 +1,4 @@
-const { where } = require('sequelize');
+const { Op,where } = require('sequelize');
 const gymDetailsModel = require('../Models/gymDetailsModel');
 const partnerLoginModel = require('../Models/partnerLoginModel')
 const sessionModel = require('../Models/sessionModel');
@@ -94,7 +94,7 @@ const updateAmenitiesController = async (req, res) => {
         })
 
         res.json({
-            message: "Amenities added successfully",
+            message: "Amenities updated successfully",
             response: true
         });
 
@@ -118,7 +118,13 @@ const addSessionSlotsController = async (req, res) => {
         let sessionSlots = req.body;
         let {currentDate} = req.query;
 
-        let newDate = currentDate;
+        await gymDetailsModel.update({totalSessionCapacity : sessionSlots[0].sessionCount},{
+            where : {
+                id : sessionSlots[0].gymId
+            }
+        })
+        
+        let newDate = new Date(currentDate);
 
         let updatedSlots = []
         
@@ -135,8 +141,6 @@ const addSessionSlotsController = async (req, res) => {
         }
 
         let finalSessionSlot = [...sessionSlots,...updatedSlots];
-
-        console.log(finalSessionSlot);
 
         await sessionModel.bulkCreate(finalSessionSlot);
 
@@ -175,15 +179,25 @@ const updateScheduleController = async(req,res) => {
         if(getSessionDate === null) {
             currentTimeZone.setDate(currentTimeZone.getDate() - 1);
             let previousDate = `${currentTimeZone.getDate()}/${currentTimeZone.getMonth()+1}/${currentTimeZone.getFullYear()}`;
-            
-            // await sessionModel.update({date : lastDate,sessionCount : 30},{
-            //     where : 
-            // })
+
+            await sessionModel.update({date : lastDate,sessionCount :30 },{
+                where : {
+                    date : previousDate
+                }
+            })
+
+            res.json({
+                message : "Schedule Updated",
+                response : true
+            });
+        } else {
+            res.json({
+                message : "schedule upto date",
+                response : true
+            })
         }
 
-        res.json({
-            getSessionDate
-        });
+        
          
 
     } catch(err) {
@@ -197,10 +211,74 @@ const updateScheduleController = async(req,res) => {
 }
 
 
+// get All Slots
+
+
+const getAllSlotsController = async(req,res) => {
+    try {
+
+        let mobileNumber = req.userDetails.payloadData.mobileNumber;
+
+        let gymId = await gymDetailsModel.findOne({
+            include : [
+                {
+                    model : partnerLoginModel,
+                    attributes : [],
+                    as : "partnerInfo"
+                }
+            ],
+            attributes : ['id'],
+            where : {
+                '$partnerInfo.mobileNumber$' : mobileNumber
+            }
+        })
+
+        let date = new Date();
+        date = `${date.getDate()}/${date.getMonth()+1}/${date.getFullYear()}`
+
+        let slotData = await sessionModel.findAll({
+            include : [
+                {
+                    model : gymDetailsModel,
+                    attributes : ['totalSessionCapacity'],
+                    as : 'gymDetails'
+                }
+            ],
+            attributes : ['sessionTiming'],
+            where : {
+                [Op.and] : [
+                    {
+                        gymId : gymId.id
+                    },
+                    {
+                        date : date
+                    }
+                ]
+            }
+        })
+
+        res.json({
+            message : "Session Slot Timing",
+            response : true,
+            data : slotData
+        })
+
+    } catch(err) {
+        console.log(err);
+
+        res.json({
+            message: "Something went wrong!!",
+            response: false
+        })
+    }
+}
+
+
 module.exports = {
     partnerInfoController,
     updateAmenitiesController,
     addSessionSlotsController,
     gymInfoController,
-    updateScheduleController
+    updateScheduleController,
+    getAllSlotsController
 }
