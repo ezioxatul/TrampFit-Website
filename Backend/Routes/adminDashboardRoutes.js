@@ -30,6 +30,12 @@ router.get('/adminDashboard/user/getUserActiveMembership',adminSecretKey,jwtVeri
 // 5. apply filter on individual user membership
 router.get('/adminDashboard/user/filterUserMembership',adminDashboardController.filterUserMembershipController);
 
+// 6. get all session History
+router.get('/adminDashboard/user/getAllSessionHistory',adminSecretKey,jwtVerification,adminDashboardController.getAllSessionHistoryController);
+
+// 7. get last session booking
+router.get('/adminDashboard/user/getLastBookedSession',adminSecretKey,jwtVerification,adminDashboardController.getLastBookedSessionController);
+
 // adminDashboard -> Partners
 
 // 1. get all partners information

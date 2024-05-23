@@ -6,6 +6,8 @@ const gymDetailsModel = require('../Models/gymDetailsModel');
 const transporter = require('../helper/sendEmailVerification');
 const { where, Op } = require("sequelize");
 const sequelize = require("../databaseConnection");
+const sessionBookingModel = require('../Models/sessionBookingModel');
+const sessionTimeModel = require('../Models/sessionModel');
 const { response } = require('express');
 const pug = require('pug');
 
@@ -413,6 +415,93 @@ const filterUserMembershipController = async (req, res) => {
     }
 }
 
+// get all session History 
+const getAllSessionHistoryController = async (req, res) => {
+    try {
+        let { userId } = req.query;
+
+        let getUserSessionHistory = await sessionBookingModel.findAll({
+            include: [
+                {
+                    model: sessionTimeModel,
+                    attributes: ['sessionTiming'],
+                    as: "sessionInfo",
+                    include: [
+                        {
+                            model: gymDetailsModel,
+                            attributes: ['gymName', 'gymCity'],
+                            as: 'gymDetails'
+                        }
+                    ]
+                }
+            ],
+            attributes: ['bookingDate', 'id'],
+            where: {
+                userId: userId
+            },
+            order: sequelize.col('bookingDate')
+        })
+
+        res.json({
+            message: "User Session Information",
+            response: true,
+            data: getUserSessionHistory
+        });
+
+
+    } catch (err) {
+        console.log(err);
+
+        res.json({
+            message: "Something went wrong !!",
+            response: false
+        })
+    }
+}
+
+// get last booking session history
+const getLastBookedSessionController = async (req, res) => {
+    try {
+
+        let { userId } = req.query;
+
+        let getUserSessionHistory = await sessionBookingModel.findOne({
+            include: [
+                {
+                    model: sessionTimeModel,
+                    attributes: ['sessionTiming'],
+                    as: "sessionInfo",
+                    include: [
+                        {
+                            model: gymDetailsModel,
+                            attributes: ['gymName', 'gymCity'],
+                            as: 'gymDetails'
+                        }
+                    ]
+                }
+            ],
+            attributes: ['bookingDate', 'id'],
+            where: {
+                userId: userId
+            },
+            order: [['createdAt', 'DESC']]
+        })
+
+        res.json({
+            message: "Last session booked..",
+            response: true,
+            data: getUserSessionHistory
+        });
+
+    } catch (err) {
+        console.log(err);
+
+        res.json({
+            message: "Something went Wrong !!",
+            response: false
+        })
+    }
+}
 // display partners information on the admin portal
 const getPartnerInfoController = async (req, res) => {
     try {
@@ -641,7 +730,7 @@ const partnerRejectedController = async (req, res) => {
 
     try {
 
-        let { partnerId,rejectedReason,email } = req.query;
+        let { partnerId, rejectedReason, email } = req.query;
 
         await partnerLoginModel.update({ status: "Rejected" }, {
             where: {
@@ -649,7 +738,7 @@ const partnerRejectedController = async (req, res) => {
             }
         })
 
-        let htmlContent = pug.renderFile('emailTemplate/partnerRejectionTemplate.pug', {reason:rejectedReason});
+        let htmlContent = pug.renderFile('emailTemplate/partnerRejectionTemplate.pug', { reason: rejectedReason });
 
         const info = await transporter.sendMail({
             from: '"Trampfit" <trampfit180@gmail.com>',
@@ -683,30 +772,30 @@ const partnerRejectedController = async (req, res) => {
 
 // partner View Detail ONboarding data
 
-const partnerViewDetailController = async(req,res) => {
+const partnerViewDetailController = async (req, res) => {
     try {
 
-        let {partnerId} = req.query;
+        let { partnerId } = req.query;
 
         let viewpartnerOnboardingDetail = await gymDetailsModel.findOne({
-            attributes : ['gymName','gymDescription','gymLogo','interiorPhoto','panNumber','gstNumber','panImage'],
-            where : {
-                partnerId : partnerId
+            attributes: ['gymName', 'gymDescription', 'gymLogo', 'interiorPhoto', 'panNumber', 'gstNumber', 'panImage'],
+            where: {
+                partnerId: partnerId
             }
         })
 
         res.json({
-            message : "View Detail",
-            response : true,
-            data : viewpartnerOnboardingDetail
+            message: "View Detail",
+            response: true,
+            data: viewpartnerOnboardingDetail
         })
 
-    } catch(err) {
+    } catch (err) {
         console.log(err);
 
         res.json({
-            message : "Something went wrong !!",
-            response : false
+            message: "Something went wrong !!",
+            response: false
         })
     }
 }
@@ -833,5 +922,7 @@ module.exports = {
     getPartnersOnboardingDataController,
     partnerApprovalController,
     partnerRejectedController,
-    partnerViewDetailController
+    partnerViewDetailController,
+    getAllSessionHistoryController,
+    getLastBookedSessionController
 }
