@@ -242,7 +242,7 @@ const bookedSlotController = async (req,res) => {
         let gymName = req.information.partnerInfo.gymDetails.gymName;
         let userName = req.information.userInfo.fullName;
 
-        let partnerEmail = req.information.partnerInfo.gymDetails.partnerInfo.email;
+        // let partnerEmail = req.information.partnerInfo.gymDetails.partnerInfo.email;
 
         await sessionBookingModel.create({
             bookingDate : date,

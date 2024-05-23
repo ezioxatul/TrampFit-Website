@@ -22,7 +22,7 @@ const sequelizeAssociations =  () => {
     sessionModel.hasMany(sessionBookingModel,{foreignKey : "sessionId" , as : "sessionInfo"});
     sessionBookingModel.belongsTo(sessionModel,{foreignKey : "sessionId" , as : "sessionInfo"});
 
-    userSignupModel.hasMany(sessionBookingModel,{foreignKey : "userId",as : "userDetails"});
+    userSignupModel.hasMany(sessionBookingModel,{foreignKey : "userId",as : "userDetails",onDelete : "CASCADE" });
     sessionBookingModel.belongsTo(userSignupModel,{foreignKey : "userId",as : "userDetails"});
 
 
