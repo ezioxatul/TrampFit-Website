@@ -58,7 +58,7 @@ export default function PartnerSideBar() {
                                             </ListItemButton>
                                         </Link> :
                                         index === 2 ?
-                                            <Link href="#">
+                                            <Link href="/partner/partnerDashboard/sessionHistory">
                                                 <ListItemButton className=' space-x-4 hover:bg-green-100 hover:rounded-2xl hover:text-green-600'>
                                                     <CardTravelIcon className='text-2xl' />
                                                     <ListItemText primary={text} />
