@@ -22,4 +22,10 @@ router.put('/partnerDashboard/updateSchedule',partnerDashboardController.updateS
 // get all slots
 router.get('/partnerDashboard/getAllSlots',partnerSecretKey,jwtVerification,partnerDashboardController.getAllSlotsController);
 
+// get session history
+router.get('/partnerDashboard/getSessionHistory',partnerSecretKey,jwtVerification,partnerDashboardController.getAllSessionHistoryController);
+
+// search session history 
+router.get('/partnerDashboard/getSearchData',partnerSecretKey,jwtVerification,partnerDashboardController.getSearchDataController);
+
 module.exports = router;

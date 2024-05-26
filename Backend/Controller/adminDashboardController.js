@@ -539,34 +539,42 @@ const searchPartnerController = async (req, res) => {
 
         let searchText = req.query.searchText;
 
-        let searchPartner = await partnerLoginModel.findAll({
-            attributes: ['id', 'fullName', 'mobileNumber', 'email', 'status'],
-            where: {
-                [Op.or]: [
-                    sequelize.where(sequelize.cast(sequelize.col('mobileNumber'), 'VARCHAR'), {
-                        [Op.iLike]: `%${searchText}%`
-                    }),
-                    {
-                        fullName: {
-                            [Op.iLike]: `%${searchText}%`
-                        }
+        let partnerInfoData = await gymDetailsModel.findAll({
+            include: [
+                {
+                    model: partnerLoginModel,
+                    attributes: ['id', 'fullName', 'mobileNumber', 'email', 'status'],
+                    where: {
+                        [Op.or]: [
+                            sequelize.where(sequelize.cast(sequelize.col('mobileNumber'), 'VARCHAR'), {
+                                [Op.iLike]: `%${searchText}%`
+                            }),
+                            {
+                                fullName: {
+                                    [Op.iLike]: `%${searchText}%`
+                                }
+                            },
+
+                            {
+                                email: {
+                                    [Op.iLike]: `%${searchText}%`
+                                }
+                            }
+
+                        ]
                     },
 
-                    {
-                        email: {
-                            [Op.iLike]: `%${searchText}%`
-                        }
-                    }
-
-                ]
-            },
-            order: sequelize.col('id')
+                    as: 'partnerInfo',
+                }
+            ]
+            , order: sequelize.col('id')
+            , attributes: []
         })
 
         res.json({
             message: "Search Partner Info",
             response: true,
-            data: searchPartner
+            data: partnerInfoData
         })
 
     } catch (err) {
@@ -584,14 +592,23 @@ const filterPartnerController = async (req, res) => {
 
         let filterInfo = Object.values(req.query);
 
-        let partnerFilterData = await partnerLoginModel.findAll({
-            attributes: ['id', 'fullName', 'mobileNumber', 'email', 'status'],
-            where: {
-                status: {
-                    [Op.in]: filterInfo
+        let partnerFilterData = await gymDetailsModel.findAll({
+            include: [
+                {
+                    model: partnerLoginModel,
+                    attributes: ['id', 'fullName', 'mobileNumber', 'email', 'status'],
+                    where: {
+                        status: {
+                            [Op.in]: filterInfo
+                        }
+                    },
+                    as: 'partnerInfo',
                 }
-            }
+            ]
+            , order: sequelize.col('id')
+            , attributes: [],
         })
+
 
         res.json({
             message: "Data filtered Successfully",

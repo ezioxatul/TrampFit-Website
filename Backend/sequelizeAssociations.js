@@ -5,6 +5,7 @@ const userSignupModel = require('./Models/signUpModel')
 const paymentDetailModel = require('./Models/paymentDetailModel');
 const sessionModel = require('./Models/sessionModel');
 const sessionBookingModel = require('./Models/sessionBookingModel')
+const feedbackModel = require('./Models/feedbackModel');
 
 const sequelizeAssociations =  () => {
     paymentDetailModel.hasMany(userSignupModel, { foreignKey: "MembershipId", as: "userInfo" });
@@ -25,7 +26,14 @@ const sequelizeAssociations =  () => {
     userSignupModel.hasMany(sessionBookingModel,{foreignKey : "userId",as : "userDetails",onDelete : "CASCADE" });
     sessionBookingModel.belongsTo(userSignupModel,{foreignKey : "userId",as : "userDetails"});
 
+    partnerLoginModel.hasMany(sessionBookingModel,{foreignKey : "partnerId" , as : "partnerDetails"});
+    sessionBookingModel.belongsTo(partnerLoginModel,{foreignKey : "partnerId" , as : "partnerDetails"});
 
+    userSignupModel.hasMany(feedbackModel,{foreignKey : "userId" , as : "userViews"});
+    feedbackModel.belongsTo(userSignupModel,{foreignKey : "userId" , as : "userViews"});
+
+    gymDetailsModel.hasMany(feedbackModel,{foreignKey : "gymId" , as : "gymViews"});
+    feedbackModel.belongsTo(gymDetailsModel,{foreignKey : "gymId" , as : "gymViews"});
 }
 
 sequelize.sync({ alter: false }).then((res) => {

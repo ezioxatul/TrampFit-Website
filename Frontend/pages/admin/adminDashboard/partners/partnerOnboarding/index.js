@@ -25,6 +25,7 @@ export default function partnerOnBoarding() {
     let [rejectionReason, setRejectionReason] = useState(false);
     let [rejectionConfirmation, setRejectionConfirmation] = useState(false);
     let [rejectionReasonMessage, setRejectionReasonMessage] = useState();
+    let [partnerPendingRequest, setPartnerPendingRequest] = useState(false);
 
     useEffect(() => {
 
@@ -46,17 +47,22 @@ export default function partnerOnBoarding() {
 
                     if (partnerOnboardingData.response) {
 
-                        partnerOnboardingData.data.map((val, i) => {
+                        if (partnerOnboardingData.data.length > 0) {
+                            partnerOnboardingData.data.map((val, i) => {
 
-                            let timeZone = new Date(val.createdAt);
+                                let timeZone = new Date(val.createdAt);
 
-                            let date = `${timeZone.getDate()}/${timeZone.getMonth() + 1}/${timeZone.getFullYear()}`
+                                let date = `${timeZone.getDate()}/${timeZone.getMonth() + 1}/${timeZone.getFullYear()}`
 
-                            partnerOnboardingData.data[i].createdAt = date
+                                partnerOnboardingData.data[i].createdAt = date
 
-                        });
+                            });
 
-                        setPartnerOnboardingData(partnerOnboardingData.data);
+                            setPartnerOnboardingData(partnerOnboardingData.data);
+
+                        } else {
+                            setPartnerPendingRequest(true);
+                        }
 
                     } else {
                         toast.error(partnerOnboardingData.message);
@@ -170,12 +176,12 @@ export default function partnerOnBoarding() {
         let email = partnerInfo[3];
         let status = partnerInfo[4];
         router.push({
-            pathname : `/admin/adminDashboard/partners/partnerOnboarding/${partnerId}`,
-            query : {
-                gymName : gymName,
-                partnerName : partnerName,
-                email : email,
-                status : status
+            pathname: `/admin/adminDashboard/partners/partnerOnboarding/${partnerId}`,
+            query: {
+                gymName: gymName,
+                partnerName: partnerName,
+                email: email,
+                status: status
             }
         })
     }
@@ -186,52 +192,58 @@ export default function partnerOnBoarding() {
                 <AdminSideBar />
                 <div className=" space-y-12">
                     <h1 className=" text-green-600 ml-20 text-2xl mt-8 ">Partners Onboarding</h1>
-                    <div className=" space-y-6">
-                        {
-                            partnerOnboardingData.map((val) => {
-                                return (
-                                    <div className=" w-[54rem] border h-48 ml-20 rounded-lg">
-                                        <div className="flex justify-between mt-4 ml-4 mr-4 mb-4">
-                                            <p className=" text-lg text-green-600">{val.partnerInfo.fullName}</p>
-                                            <p className=" text-lg text-gray-400">#{val.partnerId}</p>
-                                        </div>
-                                        <Separator className="border-gray-400 ml-4 w-[52rem]" />
-                                        <div className=" flex justify-between mt-4 ml-4 mr-4 mb-2">
-                                            <p className=" text-sm text-gray-400">Request Date : {val.createdAt}</p>
-                                            <p className=" text-sm text-gray-300 rounded-sm  font-semibold p-2">{val.partnerInfo.status === "Rejected" && <CancelIcon className=" text-red-400 mt-[-0.2rem]" />}  <span className={val.partnerInfo.status === "Rejected" && "text-red-400"}>{val.partnerInfo.status === "Pending" ? "Need Approval" : val.partnerInfo.status}</span></p>
-                                        </div>
-                                        <div className=" flex justify-between ml-4 mr-4 mb-4 mt-4">
-                                            <div className="flex space-x-4">
+                    {
+                        partnerPendingRequest === false ?
 
-                                                <p className=" text-green-600 text-xs hover:bg-green-200 hover:text-green-700 transition bg-green-100 p-2 rounded-lg w-20 text-center cursor-pointer" id={`${val.partnerId}+${val.gymName}+${val.partnerInfo.fullName}+${val.partnerInfo.email}`} onClick={handleApprove}>APPROVE</p>
-                                                {
-                                                    val.partnerInfo.status !== 'Rejected' &&
-                                                    <p className=" text-red-600 text-xs hover:bg-red-200 hover:text-red-700 transition bg-red-100 p-2 rounded-lg w-20 text-center cursor-pointer" id={`${val.partnerId}+${val.gymName}+${val.partnerInfo.fullName}+${val.partnerInfo.email}`} onClick={handleRejection}>REJECT</p>
+                            <div className=" space-y-6">
+                                {
+                                    partnerOnboardingData.map((val) => {
+                                        return (
+                                            <div className=" w-[54rem] border h-48 ml-20 rounded-lg">
+                                                <div className="flex justify-between mt-4 ml-4 mr-4 mb-4">
+                                                    <p className=" text-lg text-green-600">{val.partnerInfo.fullName}</p>
+                                                    <p className=" text-lg text-gray-400">#{val.partnerId}</p>
+                                                </div>
+                                                <Separator className="border-gray-400 ml-4 w-[52rem]" />
+                                                <div className=" flex justify-between mt-4 ml-4 mr-4 mb-2">
+                                                    <p className=" text-sm text-gray-400">Request Date : {val.createdAt}</p>
+                                                    <p className=" text-sm text-gray-300 rounded-sm  font-semibold p-2">{val.partnerInfo.status === "Rejected" && <CancelIcon className=" text-red-400 mt-[-0.2rem]" />}  <span className={val.partnerInfo.status === "Rejected" && "text-red-400"}>{val.partnerInfo.status === "Pending" ? "Need Approval" : val.partnerInfo.status}</span></p>
+                                                </div>
+                                                <div className=" flex justify-between ml-4 mr-4 mb-4 mt-4">
+                                                    <div className="flex space-x-4">
 
-                                                }
+                                                        <p className=" text-green-600 text-xs hover:bg-green-200 hover:text-green-700 transition bg-green-100 p-2 rounded-lg w-20 text-center cursor-pointer" id={`${val.partnerId}+${val.gymName}+${val.partnerInfo.fullName}+${val.partnerInfo.email}`} onClick={handleApprove}>APPROVE</p>
+                                                        {
+                                                            val.partnerInfo.status !== 'Rejected' &&
+                                                            <p className=" text-red-600 text-xs hover:bg-red-200 hover:text-red-700 transition bg-red-100 p-2 rounded-lg w-20 text-center cursor-pointer" id={`${val.partnerId}+${val.gymName}+${val.partnerInfo.fullName}+${val.partnerInfo.email}`} onClick={handleRejection}>REJECT</p>
+
+                                                        }
 
 
 
+                                                    </div>
+                                                    <p className=" cursor-pointer text-xs rounded-lg text-green-600 border-green-600 border p-2" id={`${val.partnerId}+${val.gymName}+${val.partnerInfo.fullName}+${val.partnerInfo.email}+${val.partnerInfo.status}`} onClick={openViewDetail}>VIEW DETAIL</p>
+                                                </div>
                                             </div>
-                                            <p className=" cursor-pointer text-xs rounded-lg text-green-600 border-green-600 border p-2" id={`${val.partnerId}+${val.gymName}+${val.partnerInfo.fullName}+${val.partnerInfo.email}+${val.partnerInfo.status}`} onClick={openViewDetail}>VIEW DETAIL</p>
-                                        </div>
-                                    </div>
-                                );
-                            })
-                        }
-                        <Dialog open={rejectionReason}>
-                            <DialogContent className="w-[35rem] h-56">
+                                        );
+                                    })
+                                }
+                                <Dialog open={rejectionReason}>
+                                    <DialogContent className="w-[35rem] h-56">
 
-                                <Textarea placeholder="Enter the Message" className=' h-28 text-base resize-none' onChange={getRejectionReason} />
-                                <div className="flex float-right space-x-3">
-                                    <Button className=" hover:bg-green-700  bg-green-600 mt-5 p-2 text-white mr-2 mb-3 text-sm" onClick={handleCancelSubmit}>Cancel</Button>
-                                    <Button className=" hover:bg-green-700  bg-green-600 mt-5 p-2 text-white mr-2 mb-3 text-sm" onClick={handleRejectedPartner}>Submitt</Button>
-                                </div>
-                            </DialogContent>
-                        </Dialog>
-                        <Popup open={start} title={"Do you want to Approve?"} cancel="Cancel" logout="Approve" logoutEvent={approvedEvent} cancelEvent={cancelEvent} />
-                        <Popup open={rejectionConfirmation} title={"Do you want to Reject?"} cancel="Cancel" logout="Reject" logoutEvent={rejectionEvent} cancelEvent={cancelRejection} />
-                    </div>
+                                        <Textarea placeholder="Enter the Message" className=' h-28 text-base resize-none' onChange={getRejectionReason} />
+                                        <div className="flex float-right space-x-3">
+                                            <Button className=" hover:bg-green-700  bg-green-600 mt-5 p-2 text-white mr-2 mb-3 text-sm" onClick={handleCancelSubmit}>Cancel</Button>
+                                            <Button className=" hover:bg-green-700  bg-green-600 mt-5 p-2 text-white mr-2 mb-3 text-sm" onClick={handleRejectedPartner}>Submitt</Button>
+                                        </div>
+                                    </DialogContent>
+                                </Dialog>
+                                <Popup open={start} title={"Do you want to Approve?"} cancel="Cancel" logout="Approve" logoutEvent={approvedEvent} cancelEvent={cancelEvent} />
+                                <Popup open={rejectionConfirmation} title={"Do you want to Reject?"} cancel="Cancel" logout="Reject" logoutEvent={rejectionEvent} cancelEvent={cancelRejection} />
+                            </div> :
+                            <p className=" text-green-500 text-xl ml-12 text-center">No pending request...</p>
+                    }
+
                     <ToastContainer />
                 </div>
             </div>

@@ -33,14 +33,15 @@ export async function getStaticProps() {
     return { props: { planDetail } }
 }
 
+
 export default function browseGym({ planDetail }) {
 
     let [browseGymDetail, setBrowseGymDetail] = useState([]);
     let [searching, setSearching] = useState(false);
     let [searchText, setSearchText] = useState();
     let [nextStart, setNextStart] = useState(false);
-    let [start,setStart] = useState(false);
-    let [subscriptionId,setSubscriptionId] = useState();
+    let [start, setStart] = useState(false);
+    let [subscriptionId, setSubscriptionId] = useState();
     let [membershipDetails, setMembershipDetails] = useState({
         membershipId: planDetail[0].id,
         membershipPlan: planDetail[0].membershipName,
@@ -49,43 +50,71 @@ export default function browseGym({ planDetail }) {
         planDescription: planDetail[0].description
     })
 
+    let [gymStudioData, setGymStudioData] = useState(false);
+    let [cityName, setCityName] = useState("");
+    let [airConditioner, setAirConditioner] = useState("");
+    let [wifi, setWifi] = useState("");
+    let [parking, setParking] = useState("");
+    let [locker, setLocker] = useState("");
+    let [shower, setShower] = useState("");
+    let [waterCooler, setWaterCooler] = useState("");
+
+    let featureNameFirstColumn = ['Air Conditioner', 'WiFi', 'Shower']
+    let featureNameSecondColumn = ['Parking', 'Locker', 'Water Cooler']
+    let [gymCities, setGymCities] = useState([]);
+    let [activeFilter, setActiveFilter] = useState(false);
+    let [activeCityFilter, setCityFilter] = useState(false);
+
     useEffect(() => {
+        if ((airConditioner == "" && shower == "" && wifi == "" && locker == "" && parking == "" && waterCooler == "" ) || cityName == "") {
+            try {
 
-        try {
-
-            const option = {
-                method: "GET"
-            }
-
-            fetch('http://localhost/browseGym', option).then(async (res) => {
-
-                let browseGymData = await res.json();
-                if (browseGymData.response) {
-
-                    browseGymData.data.map((val, i) => {
-                        let gymLogo = val.gymLogo;
-                        gymLogo = gymLogo.substring(18);
-                        let result = gymLogo.replace(/\\/g, '/')
-                        browseGymData.data[i].gymLogo = result
-
-                        let limitGymDescription = val.gymDescription.substring(0, 150);
-                        browseGymData.data[i].gymDescription = limitGymDescription + "..."
-                    })
-
-                    setBrowseGymDetail(browseGymData.data);
-                } else {
-                    toast.error(browseGymData.message)
+                const option = {
+                    method: "GET"
                 }
 
-            }).catch((err) => {
-                console.log(err);
-            })
+                fetch('http://localhost/browseGym', option).then(async (res) => {
 
-        } catch (err) {
-            console.log(err);
+                    let browseGymData = await res.json();
+                    if (browseGymData.response) {
+
+                        if (browseGymData.data.length > 0) {
+                            setGymStudioData(false);
+                            let gymCities = [];
+                            browseGymData.data.map((val, i) => {
+                                if (!gymCities.includes(val.gymCity)) {
+                                    gymCities.push(val.gymCity);
+                                }
+                                let gymLogo = val.gymLogo;
+                                gymLogo = gymLogo.substring(18);
+                                let result = gymLogo.replace(/\\/g, '/')
+                                browseGymData.data[i].gymLogo = result
+
+                                let limitGymDescription = val.gymDescription.substring(0, 150);
+                                browseGymData.data[i].gymDescription = limitGymDescription + "..."
+                            })
+
+                            setGymCities(gymCities);
+
+                            setBrowseGymDetail(browseGymData.data);
+                        } else {
+                            setGymStudioData(true);
+                        }
+
+                    } else {
+                        toast.error(browseGymData.message)
+                    }
+
+                }).catch((err) => {
+                    console.log(err);
+                })
+
+            } catch (err) {
+                console.log(err);
+            }
         }
 
-    }, [])
+    }, [activeFilter,activeCityFilter])
 
     useEffect(() => {
 
@@ -101,17 +130,23 @@ export default function browseGym({ planDetail }) {
                     let browseGymData = await res.json();
                     if (browseGymData.response) {
 
-                        browseGymData.data.map((val, i) => {
-                            let gymLogo = val.gymLogo;
-                            gymLogo = gymLogo.substring(18);
-                            let result = gymLogo.replace(/\\/g, '/')
-                            browseGymData.data[i].gymLogo = result
+                        if (browseGymData.data.length > 0) {
+                            setGymStudioData(false);
+                            browseGymData.data.map((val, i) => {
+                                let gymLogo = val.gymLogo;
+                                gymLogo = gymLogo.substring(18);
+                                let result = gymLogo.replace(/\\/g, '/')
+                                browseGymData.data[i].gymLogo = result
 
-                            let limitGymDescription = val.gymDescription.substring(0, 150);
-                            browseGymData.data[i].gymDescription = limitGymDescription + "..."
-                        })
+                                let limitGymDescription = val.gymDescription.substring(0, 150);
+                                browseGymData.data[i].gymDescription = limitGymDescription + "..."
+                            })
 
-                        setBrowseGymDetail(browseGymData.data);
+                            setBrowseGymDetail(browseGymData.data);
+                        } else {
+                            setGymStudioData(true);
+                        }
+
                     } else {
                         toast.error(browseGymData.message)
                     }
@@ -127,6 +162,98 @@ export default function browseGym({ planDetail }) {
 
     }, [searching])
 
+    useEffect(() => {
+
+        try {
+
+            if (airConditioner != "" || shower != "" || wifi != "" || locker != "" || parking != "" || waterCooler != "") {
+                const option = {
+                    method: "GET"
+                }
+
+                fetch(`http://localhost/browseGym/applyAmenitiesFilter?AirConditioner=${airConditioner}&Shower=${shower}&wifi=${wifi}&locker=${locker}&parking=${parking}&waterCooler=${waterCooler}`, option).then(async (res) => {
+
+                    let browseGymData = await res.json();
+                    if (browseGymData.response) {
+                        if (browseGymData.data.length > 0) {
+                            setGymStudioData(false);
+                            browseGymData.data.map((val, i) => {
+                                let gymLogo = val.gymLogo;
+                                gymLogo = gymLogo.substring(18);
+                                let result = gymLogo.replace(/\\/g, '/')
+                                browseGymData.data[i].gymLogo = result
+
+                                let limitGymDescription = val.gymDescription.substring(0, 150);
+                                browseGymData.data[i].gymDescription = limitGymDescription + "..."
+                            })
+
+                            setBrowseGymDetail(browseGymData.data);
+                        } else {
+                            setGymStudioData(true);
+                        }
+
+                    } else {
+                        toast.error(browseGymData.message)
+                    }
+
+
+                }).catch((err) => {
+                    console.log(err);
+                })
+            }
+
+        } catch (err) {
+            console.log(err);
+        }
+
+    }, [activeFilter])
+
+    // city filter 
+
+    useEffect(() => {
+
+        if (cityName != "") {
+            try {
+                console.log("sdgfddggdgh")
+                const option = {
+                    method: "GET"
+                }
+
+                fetch(`http://localhost/browseGym/applyCityFilter?cityName=${cityName}`, option).then(async (res) => {
+
+                    let browseGymData = await res.json();
+                    if (browseGymData.response) {
+                        browseGymData.data.map((val, i) => {
+                            let gymLogo = val.gymLogo;
+                            gymLogo = gymLogo.substring(18);
+                            let result = gymLogo.replace(/\\/g, '/')
+                            browseGymData.data[i].gymLogo = result
+
+                            let limitGymDescription = val.gymDescription.substring(0, 150);
+                            browseGymData.data[i].gymDescription = limitGymDescription + "..."
+                        })
+
+                        setBrowseGymDetail(browseGymData.data);
+
+                    } else {
+                        toast.error(browseGymData.message)
+                    }
+
+
+                }).catch((err) => {
+                    console.log(err);
+                })
+
+            } catch (err) {
+                console.log(err);
+            }
+        }
+
+
+
+    }, [activeCityFilter])
+
+    console.log(gymStudioData)
     const getSearchValue = (e) => {
         setSearching(!searching);
         setSearchText(e.target.value)
@@ -216,23 +343,9 @@ export default function browseGym({ planDetail }) {
         }
     }
 
-    let cityNameFirstColumn = ['Delhi', 'Bengaluru', 'Gurugram', 'Noida',
-        'Chandigarh', 'Chennai', 'Gaziabad', 'Vadadara', 'Udaipur', 'Shimla',
-        'Riapur', 'Madurai', 'Ludhiana', 'Kanpur', 'Guwahati', 'Dehradun',
-        'Bhubaneswar', 'Amritsar', 'Amravati', 'Nashik']
-
-    let cityNameSecondColumn = ['Mumbai', 'Pune', 'Hyderabad', 'Jaipur',
-        'Ahmedabad', 'Kolkata', 'Faridabad', 'Jodhpur', 'Surat', 'Ranchi',
-        'Patna', 'Lucknow', 'Kochi', 'Indore', 'Goa', 'Coimbatore', 'Bhopal',
-        'Agra', 'Akola', 'Kolhapur']
-
-    let featureNameFirstColumn = ['Air Conditioner', 'WiFi', 'Shower']
-    let featureNameSecondColumn = ['Parking', 'Locker', 'Water Cooler']
-
     let [openingPopover, setOpeningPopover] = useState(false);
 
     let [open, setOpen] = useState(false);
-    let [cityName, setCityName] = useState();
     let [payableAmount, setPayableAmount] = useState(planDetail[0].amount);
 
     let [firstStyle, setFirstStyle] = useState({
@@ -256,20 +369,67 @@ export default function browseGym({ planDetail }) {
         sideText: "text-Black"
     });
 
+
+
+    const getFilterValue = (e) => {
+        if (e.target.checked) {
+            if (e.target.name === "Air Conditioner") {
+                setAirConditioner(e.target.value);
+            } else if (e.target.name === "WiFi") {
+                setWifi(e.target.value);
+            } else if (e.target.name === "Shower") {
+                setShower(e.target.value);
+            } else if (e.target.name === "Locker") {
+                setLocker(e.target.value);
+            } else if (e.target.name === "Parking") {
+                setParking(e.target.value);
+            } else {
+                setWaterCooler(e.target.value);
+            }
+        } else {
+            if (e.target.name === "Air Conditioner") {
+                setAirConditioner("");
+            } else if (e.target.name === "WiFi") {
+                setWifi("");
+            } else if (e.target.name === "Shower") {
+                setShower("");
+            } else if (e.target.name === "Locker") {
+                setLocker("");
+            } else if (e.target.name === "Parking") {
+                setParking("");
+            } else {
+                setWaterCooler("");
+            }
+        }
+    }
+
     const handleCity = () => {
         setOpen(true)
     }
 
     const getCity = (e) => {
         setCityName(e.target.value);
+        setCityFilter(!activeCityFilter);
         setOpen(false)
     }
 
     const handleAmenities = () => {
+        setWaterCooler("");
+        setParking("");
+        setLocker("");
+        setShower("");
+        setWifi("");
+        setAirConditioner("");
         setOpeningPopover(true)
     }
 
     const handleApplyAmmenities = () => {
+        setActiveFilter(!activeFilter);
+        setOpeningPopover(false)
+    }
+
+    const handleClosing = () => {
+        setActiveFilter(!activeFilter);
         setOpeningPopover(false)
     }
 
@@ -380,6 +540,15 @@ export default function browseGym({ planDetail }) {
     }
 
 
+    const handleCloseCities = () => {
+        setOpen(false);
+    }
+
+    const clearCity = () => {
+        setCityFilter(!activeCityFilter);
+        setCityName("");
+    }
+
     return (
         <>
             <div className="flex flex-col min-h-screen">
@@ -403,13 +572,13 @@ export default function browseGym({ planDetail }) {
                             }}
                         >
 
-                            <div className="w-96 h-96">
-                                <RadioGroup className="flex  mt-5">
-                                    <div className=" ml-6 space-y-5">
+                            <div className="w-80">
+                                <RadioGroup className="flex mt-5">
+                                    <div className=" ml-6 mb-4 flex flex-wrap gap-x-16 gap-y-5">
                                         {
-                                            cityNameFirstColumn.map((val) => {
+                                            gymCities.map((val) => {
                                                 return (
-                                                    <div className="flex items-center space-x-2">
+                                                    <div className="flex w-20  items-center space-x-2">
                                                         <RadioGroupItem value={val} id="r1" className="text-green-600 text-md border-gray-400" onClick={getCity} />
                                                         <Label htmlFor="r1" className="text-gray-400 text-md">{val}</Label>
                                                     </div>
@@ -418,27 +587,18 @@ export default function browseGym({ planDetail }) {
                                             })
                                         }
                                     </div>
-
-                                    <div className=" ml-10 space-y-5">
-                                        {
-                                            cityNameSecondColumn.map((val) => {
-                                                return (
-                                                    <div className="flex items-center space-x-2">
-                                                        <RadioGroupItem value={val} id="r1" className="text-green-600 text-md border-gray-400" onClick={getCity} />
-                                                        <Label htmlFor="r1" className="text-gray-400 text-md">{val}</Label>
-                                                    </div>
-                                                )
-                                            })
-                                        }
-                                    </div>
                                 </RadioGroup>
+                            </div>
+                            <div className="flex float-right space-x-4 ml-1 p-5 pt-0 pr-10 mr-4">
+                                <Button className="h-8 w-20 hover:bg-gray-100 hover:border-gray-200  rounded-sm bg-white text-gray-400 border-2 border-gray-300" onClick={clearCity}>Clear</Button>
+                                <Button className="h-8 w-20 hover:bg-gray-100 hover:border-gray-200  rounded-sm bg-white text-gray-400 border-2 border-gray-300" onClick={handleCloseCities}>Close</Button>
                             </div>
 
                         </Popover>
 
 
-                        <Input type="text" placeholder={"Amenities"} className="text-black pt-1 pl-7 text-lg w-[30rem] h-11 rounded-3xl border-2 border-green-600 mr-8" onClick={handleAmenities} />
-                        <ArrowDropDownIcon className="absolute ml-[42rem] mt-1.5 h-8 w-8 text-green-600" />
+                        <Input type="text" placeholder={"Amenities"} className="text-black pt-1 pl-7 text-lg w-[30rem] h-11 rounded-3xl border-2 border-green-600 mr-8 " value="" onClick={handleAmenities} />
+                        <ArrowDropDownIcon className="absolute ml-[42rem] mt-1.5 h-8 w-8 text-green-600" onClick={handleAmenities} />
                         <Popover
                             open={openingPopover}
                             anchorReference="anchorPosition"
@@ -458,7 +618,7 @@ export default function browseGym({ planDetail }) {
                                         featureNameFirstColumn.map((val) => {
                                             return (
                                                 <div className="flex items-center ">
-                                                    <Checkbox color="success" />
+                                                    <Checkbox color="success" value={val} onChange={getFilterValue} name={val} />
                                                     <label
                                                         htmlFor="terms"
                                                         className="text-md "
@@ -476,7 +636,7 @@ export default function browseGym({ planDetail }) {
                                         featureNameSecondColumn.map((val) => {
                                             return (
                                                 <div className="flex items-center ">
-                                                    <Checkbox color="success" />
+                                                    <Checkbox color="success" value={val} onChange={getFilterValue} name={val} />
                                                     <label
                                                         htmlFor="terms"
                                                         className="text-md "
@@ -491,7 +651,7 @@ export default function browseGym({ planDetail }) {
                                 </div>
                             </div>
                             <div className="flex float-right space-x-4 p-5 pt-0 pr-10">
-                                <Button className="h-8 w-20 hover:bg-gray-100 hover:border-gray-200  rounded-sm bg-white text-gray-400 border-2 border-gray-300">Clear</Button>
+                                <Button className="h-8 w-20 hover:bg-gray-100 hover:border-gray-200  rounded-sm bg-white text-gray-400 border-2 border-gray-300" onClick={handleClosing}>Close</Button>
                                 <Button className=" h-8 w-20 rounded-sm bg-green-600 text-white hover:bg-green-700" onClick={handleApplyAmmenities}>Apply</Button>
                             </div>
                         </Popover>
@@ -500,45 +660,52 @@ export default function browseGym({ planDetail }) {
                         <SearchIcon className="absolute ml-[49rem] mt-[0.65rem] h-6 w-6 text-green-600" />
                     </div>
                     <div className="flex mb-10 mt-5">
-                        <div className="ml-10 space-y-8">
-                            {
-                                browseGymDetail.map((val) => {
-                                    return (
-                                        <div className=" w-[60rem] h-52 border-2 rounded-sm mb-5">
-                                            <div className=" flex border-b-2">
-                                                <div className="flex">
-                                                    <div className="ml-3 mt-3 mb-3">
-                                                        <Image
-                                                            src={val.gymLogo} // Path to your image
-                                                            alt="Description of the image" // Description of the image for accessibility
-                                                            width={100} // Reduced width of the image
-                                                            height={150} // Reduced height of the image
-                                                            className="object-cover rounded-md"
-                                                        />
+                        {
+                            gymStudioData === false ?
+                                <div className="ml-10 space-y-8">
+                                    {
+                                        browseGymDetail.map((val) => {
+                                            return (
+                                                <div className=" w-[60rem] h-36 border-2 rounded-sm mb-5">
+                                                    <div className=" flex">
+                                                        <div className="flex">
+                                                            <div className="ml-3 mt-3 mb-3">
+                                                                <Image
+                                                                    src={val.gymLogo} // Path to your image
+                                                                    alt="Description of the image" // Description of the image for accessibility
+                                                                    width={100} // Reduced width of the image
+                                                                    height={150} // Reduced height of the image
+                                                                    className="object-cover rounded-md"
+                                                                />
+                                                            </div>
+                                                            <div className="ml-8 mt-3">
+                                                                <h1 className=" text-lg font-semibold">{val.gymName}</h1>
+                                                                <h1 className="text-md text-gray-400">{val.gymLocation} , {val.gymCity}</h1>
+                                                            </div>
+                                                        </div>
+                                                        <div className="w-96 ml-6 mt-3 flex">
+                                                            <Separator orientation="vertical" className="border-l-2 h-28 ml-4 mb-3 mr-6" />
+                                                            <h1 className="text-md  font-thin mt-2">{val.gymDescription}</h1>
+                                                        </div>
+                                                        <div className="flex ml-16 mt-24">
+                                                            <Link href={`/browseGym/${val.id}`} className="text-md text-green-600 cursor-pointer">View Details</Link>
+                                                            <KeyboardDoubleArrowRightIcon className=" text-green-600" />
+                                                        </div>
                                                     </div>
-                                                    <div className="ml-8 mt-3">
-                                                        <h1 className=" text-lg font-semibold">{val.gymName}</h1>
-                                                        <h1 className="text-md text-gray-400">{val.gymLocation} , {val.gymCity}</h1>
-                                                    </div>
-                                                </div>
-                                                <div className="w-96 ml-6 mt-3 flex">
-                                                    <Separator orientation="vertical" className="border-l-2 h-28 ml-4 mb-3 mr-6" />
-                                                    <h1 className="text-md  font-thin mt-2">{val.gymDescription}</h1>
-                                                </div>
-                                                <div className="flex ml-16 mt-24">
-                                                    <Link href={`/browseGym/${val.id}`} className="text-md text-green-600 cursor-pointer">View Details</Link>
-                                                    <KeyboardDoubleArrowRightIcon className=" text-green-600" />
-                                                </div>
-                                            </div>
-                                            <div className="">
+                                                    {/* <div className="">
                                                 <Button className=" w-36 h-12 hover:bg-green-700 text-md bg-green-600 mt-2.5 mb-3.5 mr-5 p-2 float-right">Reserve Workout</Button>
-                                            </div>
-                                        </div>
-                                    );
-                                })
-                            }
+                                            </div> */}
+                                                </div>
+                                            );
+                                        })
+                                    }
 
-                        </div>
+                                </div> :
+                                <div className=" w-[60rem] ml-10 h-36 mb-5 ">
+                                    <p className="text-green-600 text-center text-2xl mt-12">No gym  Found...</p>
+                                </div>
+                        }
+
                         <div className=" w-[30rem]">
                             <h1 className="text-xl font-semibold ml-12 mb-4">What is TRAMPFIT?</h1>
                             <div className=" ml-12">
@@ -592,7 +759,7 @@ export default function browseGym({ planDetail }) {
                                 </AccordionItem>
                             </Accordion>
 
-                        {/* <ToastContainer /> */}
+                            {/* <ToastContainer /> */}
                             <div className="flex mt-10 ml-12">
                                 <div className="h-12 w-[14rem] border-2 rounded-sm cursor-pointer">
                                     <p className="text-xl text-green-600 text-center mt-2"><CurrencyRupeeIcon className=" w-4 h-4 mt-[-0.3rem]" />{payableAmount}</p>

@@ -1,9 +1,10 @@
-const { Op,where } = require('sequelize');
+const { Op, where } = require('sequelize');
 const gymDetailsModel = require('../Models/gymDetailsModel');
 const partnerLoginModel = require('../Models/partnerLoginModel')
 const sessionModel = require('../Models/sessionModel');
-const { response } = require('express');
-
+const sessionBookingModel = require('../Models/sessionBookingModel');
+const userModel = require('../Models/signUpModel');
+const sequelize = require('../databaseConnection');
 
 // get partner for partner Dashboard
 const partnerInfoController = async (req, res) => {
@@ -43,37 +44,37 @@ const partnerInfoController = async (req, res) => {
 
 
 // get gym Info 
-const gymInfoController = async(req,res) => {
+const gymInfoController = async (req, res) => {
     try {
 
         let mobileNumber = req.userDetails.payloadData.mobileNumber;
 
         let getGymInfo = await gymDetailsModel.findOne({
-            include : [
+            include: [
                 {
-                    model : partnerLoginModel,
-                    attributes : [],
-                    as : 'partnerInfo'
+                    model: partnerLoginModel,
+                    attributes: [],
+                    as: 'partnerInfo'
                 }
             ],
-            attributes : ['gymName','gymLocation','gymCity','id','amenities'],
-            where : {
-                '$partnerInfo.mobileNumber$' : mobileNumber
+            attributes: ['gymName', 'gymLocation', 'gymCity', 'id', 'amenities'],
+            where: {
+                '$partnerInfo.mobileNumber$': mobileNumber
             }
         })
 
         res.json({
-            message : "Gym Info",
-            response : true,
-            data : getGymInfo
+            message: "Gym Info",
+            response: true,
+            data: getGymInfo
         })
 
-    } catch(err) {
+    } catch (err) {
         console.log(err);
 
         res.json({
-            message : "Something went wrong !!",
-            response : false
+            message: "Something went wrong !!",
+            response: false
         });
     }
 
@@ -116,18 +117,18 @@ const addSessionSlotsController = async (req, res) => {
         // req.body = [{sessionTiming : "07:00",sessionCount : 30 , date : "12/12/2024",gymId : 1},and more]
 
         let sessionSlots = req.body;
-        let {currentDate} = req.query;
+        let { currentDate } = req.query;
 
-        await gymDetailsModel.update({totalSessionCapacity : sessionSlots[0].sessionCount},{
-            where : {
-                id : sessionSlots[0].gymId
+        await gymDetailsModel.update({ totalSessionCapacity: sessionSlots[0].sessionCount }, {
+            where: {
+                id: sessionSlots[0].gymId
             }
         })
-        
+
         let newDate = new Date(currentDate);
 
         let updatedSlots = []
-        
+
         for (var i = 1; i <= 6; i++) {
             newDate.setTime(newDate.getTime() + 24 * 60 * 60 * 1000);
             sessionSlots.forEach((val) => {
@@ -135,12 +136,12 @@ const addSessionSlotsController = async (req, res) => {
                 schedule.sessionTiming = val.sessionTiming;
                 schedule.sessionCount = val.sessionCount;
                 schedule.gymId = val.gymId;
-                schedule.date = `${newDate.getUTCDate()}/${newDate.getUTCMonth()+1}/${newDate.getUTCFullYear()}`
+                schedule.date = `${newDate.getUTCDate()}/${newDate.getUTCMonth() + 1}/${newDate.getUTCFullYear()}`
                 updatedSlots.push(schedule);
             })
         }
 
-        let finalSessionSlot = [...sessionSlots,...updatedSlots];
+        let finalSessionSlot = [...sessionSlots, ...updatedSlots];
 
         await sessionModel.bulkCreate(finalSessionSlot);
 
@@ -161,51 +162,51 @@ const addSessionSlotsController = async (req, res) => {
 
 // update schedule
 
-const updateScheduleController = async(req,res) => {
+const updateScheduleController = async (req, res) => {
     try {
 
         let currentTimeZone = new Date();
         let timeZone = new Date();
 
         timeZone.setDate(timeZone.getDate() + 6);
-        let lastDate = `${timeZone.getDate()}/${timeZone.getMonth()+1}/${timeZone.getFullYear()}`
+        let lastDate = `${timeZone.getDate()}/${timeZone.getMonth() + 1}/${timeZone.getFullYear()}`
 
         let getSessionDate = await sessionModel.findOne({
-            where : {
-                date : lastDate
+            where: {
+                date: lastDate
             }
         })
 
-        if(getSessionDate === null) {
+        if (getSessionDate === null) {
             currentTimeZone.setDate(currentTimeZone.getDate() - 1);
-            let previousDate = `${currentTimeZone.getDate()}/${currentTimeZone.getMonth()+1}/${currentTimeZone.getFullYear()}`;
+            let previousDate = `${currentTimeZone.getDate()}/${currentTimeZone.getMonth() + 1}/${currentTimeZone.getFullYear()}`;
 
-            await sessionModel.update({date : lastDate,sessionCount :30 },{
-                where : {
-                    date : previousDate
+            await sessionModel.update({ date: lastDate, sessionCount: 30 }, {
+                where: {
+                    date: previousDate
                 }
             })
 
             res.json({
-                message : "Schedule Updated",
-                response : true
+                message: "Schedule Updated",
+                response: true
             });
         } else {
             res.json({
-                message : "schedule upto date",
-                response : true
+                message: "schedule upto date",
+                response: true
             })
         }
 
-        
-         
 
-    } catch(err) {
+
+
+    } catch (err) {
         console.log(err);
-        
+
         res.json({
-            message : "Something went wrong !!",
-            response : false
+            message: "Something went wrong !!",
+            response: false
         })
     }
 }
@@ -214,56 +215,56 @@ const updateScheduleController = async(req,res) => {
 // get All Slots
 
 
-const getAllSlotsController = async(req,res) => {
+const getAllSlotsController = async (req, res) => {
     try {
 
         let mobileNumber = req.userDetails.payloadData.mobileNumber;
 
         let gymId = await gymDetailsModel.findOne({
-            include : [
+            include: [
                 {
-                    model : partnerLoginModel,
-                    attributes : [],
-                    as : "partnerInfo"
+                    model: partnerLoginModel,
+                    attributes: [],
+                    as: "partnerInfo"
                 }
             ],
-            attributes : ['id'],
-            where : {
-                '$partnerInfo.mobileNumber$' : mobileNumber
+            attributes: ['id'],
+            where: {
+                '$partnerInfo.mobileNumber$': mobileNumber
             }
         })
 
         let date = new Date();
-        date = `${date.getDate()}/${date.getMonth()+1}/${date.getFullYear()}`
+        date = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`
 
         let slotData = await sessionModel.findAll({
-            include : [
+            include: [
                 {
-                    model : gymDetailsModel,
-                    attributes : ['totalSessionCapacity'],
-                    as : 'gymDetails'
+                    model: gymDetailsModel,
+                    attributes: ['totalSessionCapacity'],
+                    as: 'gymDetails'
                 }
             ],
-            attributes : ['sessionTiming'],
-            where : {
-                [Op.and] : [
+            attributes: ['sessionTiming'],
+            where: {
+                [Op.and]: [
                     {
-                        gymId : gymId.id
+                        gymId: gymId.id
                     },
                     {
-                        date : date
+                        date: date
                     }
                 ]
             }
         })
 
         res.json({
-            message : "Session Slot Timing",
-            response : true,
-            data : slotData
+            message: "Session Slot Timing",
+            response: true,
+            data: slotData
         })
 
-    } catch(err) {
+    } catch (err) {
         console.log(err);
 
         res.json({
@@ -273,6 +274,121 @@ const getAllSlotsController = async(req,res) => {
     }
 }
 
+// get all session History
+const getAllSessionHistoryController = async (req, res) => {
+    try {
+
+        let mobileNumber = req.userDetails.payloadData.mobileNumber;
+
+        let getSessionHistory = await sessionBookingModel.findAll({
+            include: [
+                {
+                    model: userModel,
+                    attributes: ['fullName'],
+                    as: 'userDetails'
+                },
+                {
+                    model: sessionModel,
+                    attributes: ['sessionTiming'],
+                    as: 'sessionInfo',
+                },
+                {
+                    model: partnerLoginModel,
+                    attributes: [],
+                    as: 'partnerDetails',
+                }
+            ],
+            attributes: ['id', 'bookingDate', 'userId'],
+            where: {
+                '$partnerDetails.mobileNumber$': mobileNumber,
+            },
+            order: [['bookingDate', 'DESC']]
+        });
+
+
+        res.json({
+            message: "session History",
+            response: true,
+            data: getSessionHistory
+        })
+
+    } catch (err) {
+        console.log(err);
+
+        res.json({
+            message: "Something went wrong !!",
+            response: false
+        });
+    }
+}
+
+
+const getSearchDataController = async (req, res) => {
+    try {
+
+        let {searchData} = req.query;
+        let mobileNumber = req.userDetails.payloadData.mobileNumber;
+
+        let getSessionHistory = await sessionBookingModel.findAll({
+            include: [
+                {
+                    model: userModel,
+                    attributes: ['fullName'],
+                    as: 'userDetails'
+                },
+                {
+                    model: sessionModel,
+                    attributes: ['sessionTiming'],
+                    as: 'sessionInfo',
+                },
+                {
+                    model: partnerLoginModel,
+                    attributes: [],
+                    as: 'partnerDetails',
+                }
+            ],
+            attributes: ['id', 'bookingDate', 'userId'],
+            where : {
+                [Op.and] : [
+                    {
+                        '$partnerDetails.mobileNumber$': mobileNumber,
+                    } ,
+                    {
+                        [Op.or] : [
+                            {
+                                '$userDetails.fullName$' : {
+                                    [Op.iLike] : `%${searchData}%`
+                                }
+                            }, 
+                            {
+                                bookingDate : {
+                                    [Op.iLike] : `%${searchData}%`
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            order: [['createdAt', 'DESC']]
+        });
+
+
+        res.json({
+            message: "session History",
+            response: true,
+            data: getSessionHistory
+        })
+
+
+    } catch (err) {
+        console.log(err);
+
+        res.json({
+            message: "Something went wrong !!",
+            response: false
+        })
+    }
+}
 
 module.exports = {
     partnerInfoController,
@@ -280,5 +396,7 @@ module.exports = {
     addSessionSlotsController,
     gymInfoController,
     updateScheduleController,
-    getAllSlotsController
+    getAllSlotsController,
+    getAllSessionHistoryController,
+    getSearchDataController
 }

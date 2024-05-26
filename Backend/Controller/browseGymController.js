@@ -2,6 +2,7 @@ const partnerLoginModel = require('../Models/partnerLoginModel');
 const gymDetailsModel = require('../Models/gymDetailsModel');
 const userSignupModel = require('../Models/signUpModel');
 const sessionBookingModel = require('../Models/sessionBookingModel')
+const feedbackModel = require('../Models/feedbackModel');
 const sessionModel = require('../Models/sessionModel');
 const sequelize = require('../databaseConnection');
 const transporter = require('../helper/sendEmailVerification');
@@ -72,10 +73,17 @@ const getGymViewDetailController = async (req, res) => {
             }
         })
 
+        let reviewsCount = await feedbackModel.count({
+            where : {
+                gymId : gymId
+            }
+        })
+
         res.json({
             message: "Gym detail",
             response: true,
-            data: getGymData
+            data: getGymData,
+            reviewsCount : reviewsCount
         });
 
     } catch (err) {
@@ -159,13 +167,13 @@ const getSessionSlotsTimingController = async (req, res) => {
         let currentTimeZone = new Date();
         let currentTime;
         let currentDate = currentTimeZone.getDate().toString();
-        if(currentTimeZone.getHours() < 10) {
-            currentTime  = `0${currentTimeZone.getHours()}:${currentTimeZone.getMinutes()}`;
+        if (currentTimeZone.getHours() < 10) {
+            currentTime = `0${currentTimeZone.getHours()}:${currentTimeZone.getMinutes()}`;
         } else {
             currentTime = `${currentTimeZone.getHours()}:${currentTimeZone.getMinutes()}`;
 
         }
-        
+
         let getDate = date.split('/');
 
         if (currentDate === getDate[0]) {
@@ -180,15 +188,15 @@ const getSessionSlotsTimingController = async (req, res) => {
                         },
                         {
                             gymId: gymId
-                        }, 
+                        },
                         {
-                            sessionTiming : {
-                                [Op.gt] : currentTime
+                            sessionTiming: {
+                                [Op.gt]: currentTime
                             }
                         }
                     ]
                 },
-                order : sequelize.col('sessionTiming')
+                order: sequelize.col('sessionTiming')
             })
 
             res.json({
@@ -211,7 +219,7 @@ const getSessionSlotsTimingController = async (req, res) => {
                         }
                     ]
                 },
-                order : sequelize.col('sessionTiming')
+                order: sequelize.col('sessionTiming')
             })
 
             res.json({
@@ -231,10 +239,11 @@ const getSessionSlotsTimingController = async (req, res) => {
     }
 }
 
-const bookedSlotController = async (req,res) => {
+// slot booking
+const bookedSlotController = async (req, res) => {
     try {
 
-        let {sessionId,date,time} = req.body;
+        let { sessionId, date, time } = req.body;
         let userId = req.information.userInfo.id;
         let userEmail = req.information.userInfo.email;
         let userSessionCount = req.information.userInfo.totalSession;
@@ -242,28 +251,29 @@ const bookedSlotController = async (req,res) => {
         let gymName = req.information.partnerInfo.gymDetails.gymName;
         let userName = req.information.userInfo.fullName;
 
-        // let partnerEmail = req.information.partnerInfo.gymDetails.partnerInfo.email;
+        let partnerId = req.information.partnerInfo.gymDetails.partnerInfo.id;
 
         await sessionBookingModel.create({
-            bookingDate : date,
-            userId : userId,
-            sessionId : sessionId
+            bookingDate: date,
+            userId: userId,
+            sessionId: sessionId,
+            partnerId : partnerId
         })
 
-        await userSignupModel.update({totalSession : userSessionCount-1},{
-            where : {
-                id : userId
+        await userSignupModel.update({ totalSession: userSessionCount - 1 }, {
+            where: {
+                id: userId
             }
         })
 
-        await sessionModel.update({sessionCount : sessionCapacity-1},{
-            where : {
-                id : sessionId
+        await sessionModel.update({ sessionCount: sessionCapacity - 1 }, {
+            where: {
+                id: sessionId
             }
         })
 
         // user session booked notification
-        let htmlContentForUserSessionBooking = pug.renderFile('emailTemplate/userBookingConfirmation.pug',{sessionId : sessionId,date : date,gymName : gymName,sessionTiming : time,userName : userName});
+        let htmlContentForUserSessionBooking = pug.renderFile('emailTemplate/userBookingConfirmation.pug', { sessionId: sessionId, date: date, gymName: gymName, sessionTiming: time, userName: userName });
 
         const info = await transporter.sendMail({
             from: '"Trampfit" <trampfit180@gmail.com>',
@@ -274,12 +284,141 @@ const bookedSlotController = async (req,res) => {
 
 
         res.json({
-            message : "Session Booked Successfully",
-            response : true
+            message: "Session Booked Successfully",
+            response: true
         })
-        
+
+    } catch (err) {
+        console.log(err);
+        res.json({
+            message: "Something went wrong!!",
+            response: false
+        })
+    }
+}
+
+// apply filter on the basis of amenities
+const amenitiesFilterController = async (req, res) => {
+    try {
+
+        let filterArray = Object.values(req.query);
+
+        let getFilterData = await gymDetailsModel.findAll({
+            include: [
+                {
+                    model: partnerLoginModel,
+                    attributes: [],
+                    as: 'partnerInfo'
+                }
+            ],
+
+            attributes: ['id', 'gymName', 'gymLocation', 'gymCity', 'gymLogo', 'gymDescription'],
+            where: {
+                [Op.and]: [
+                    {
+                        '$partnerInfo.status$': "Approved"
+                    },
+                    {
+                        amenities: {
+                            [Op.overlap]: filterArray
+                        }
+                    }
+                ]
+            }
+        })
+
+        res.json({
+            message: "Filtered Data",
+            response: true,
+            data: getFilterData
+        })
+
+    } catch (err) {
+        console.log(err);
+
+        res.json({
+            message: "Something went wrong !!",
+            response: false
+        })
+    }
+}
+
+const cityFilterController = async (req, res) => {
+    try {
+
+        let { cityName } = req.query
+
+        let getFilterData = await gymDetailsModel.findAll({
+            include: [
+                {
+                    model: partnerLoginModel,
+                    attributes: [],
+                    as: 'partnerInfo'
+                }
+            ],
+
+            attributes: ['id', 'gymName', 'gymLocation', 'gymCity', 'gymLogo', 'gymDescription'],
+            where: {
+                [Op.and]: [
+                    {
+                        '$partnerInfo.status$': "Approved"
+                    },
+                    {
+                        gymCity : cityName  
+                    }
+                ]
+            }
+        })
+
+        res.json({
+            message: "City filter Data",
+            response: true,
+            data: getFilterData
+        })
+
+    } catch (err) {
+        console.log(err);
+
+        res.json({
+            message: "Something went wrong !!",
+            response: false
+        })
+    }
+}
+
+// check userBooking
+const checkBookingController = async(req,res) => {
+    try {
+
+        let mobileNumber = req.userDetails.payloadData.mobileNumber;
+
+        let checkData = await sessionBookingModel.findAll({
+            include : [
+                {
+                    model : userSignupModel,
+                    attributes : [],
+                    as : "userDetails"
+                },
+                {
+                    model :    sessionModel,
+                    attributes : ['gymId'],
+                    as : "sessionInfo"
+                }
+            ],
+            attributes : [],
+            where : {
+                '$userDetails.mobileNumber$' : mobileNumber
+            }
+        })
+
+            res.json({
+                message : "Booking Exists",
+                response : true,
+                data : checkData
+            })
     } catch(err) {
         console.log(err);
+
         res.json({
             message : "Something went wrong!!",
             response : false
@@ -287,10 +426,91 @@ const bookedSlotController = async (req,res) => {
     }
 }
 
+// add user feedback
+
+const addFeedbackController = async(req,res) => {
+    try {
+         
+        let mobileNumber = req.userDetails.payloadData.mobileNumber;
+
+        let {gymId,ratings,feedbackMessage} = req.body;
+
+        let userId = await userSignupModel.findOne({
+            attributes : ['id'],
+            where : {
+                mobileNumber : mobileNumber
+            }
+        })
+
+        await feedbackModel.create({
+            userId : userId.id,
+            gymId : gymId,
+            ratings : ratings,
+            feedbackMessage : feedbackMessage
+        });
+
+        res.json({
+            message : "User Review Added Successfully",
+            response : true
+        })
+
+    } catch(err) {
+        console.log(err);
+
+        res.json({
+            message : "Something went wrong !!",
+            response : false
+        })
+    }
+}
+
+
+const getUserReviewsController = async(req,res) => {
+    try {
+
+        let {gymId,limit} = req.query;
+
+        let getReviews = await feedbackModel.findAll({
+            include : [
+                {
+                    model : userSignupModel,
+                    attributes : ['fullName'],
+                    as : 'userViews'
+                }  
+            ],
+            attributes : ['ratings','feedbackMessage','createdAt'],
+            where : {
+                gymId : gymId
+            },
+            limit : limit
+        })
+
+        res.json({
+            message : "Gym reviews",
+            response : true,
+            data : getReviews
+        })
+
+    } catch(err) {
+        console.log(err);
+
+        res.json({
+            message : "Something went wrong !!",
+            response : false
+        })
+    }
+}
+
+
 module.exports = {
     getAllGymDetailsController,
     getGymViewDetailController,
     searchGymController,
     getSessionSlotsTimingController,
-    bookedSlotController
+    bookedSlotController,
+    amenitiesFilterController,
+    cityFilterController,
+    checkBookingController,
+    addFeedbackController,
+    getUserReviewsController
 }

@@ -15,12 +15,12 @@ export default function UserTable(props) {
                 <TableRow>
                     {
                         props.columnName.map((val) => {
-                            return <TableHead className="text-md w-44 text-green-600">{val}</TableHead>
+                            return <TableHead className="text-md w-60 text-green-600">{val}</TableHead>
                         })
                     }
                 </TableRow>
             </TableHeader>
-            <TableBody className="w-44">
+            <TableBody className="w-60">
                 {
                     props.rowData.map((Info) => {
                         return (

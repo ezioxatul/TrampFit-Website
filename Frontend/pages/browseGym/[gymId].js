@@ -14,6 +14,14 @@ import "react-toastify/dist/ReactToastify.css";
 import Popup from "@/components/Popup";
 import { loadStripe } from '@stripe/stripe-js';
 import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
+import { Avatar } from "@mui/material";
+import StarIcon from '@mui/icons-material/Star';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import { Textarea } from "@/components/ui/textarea"
+import CloseIcon from '@mui/icons-material/Close';
 
 export async function getStaticPaths() {
     const res = await fetch('http://localhost/browseGym', { method: "GET" });
@@ -140,6 +148,7 @@ export default function gymDetail({ gymViewDetail }) {
     let [dateSlot, setDateSlot] = useState(`${timeZoneArray[0].getDate()}/${timeZoneArray[0].getMonth() + 1}/${timeZoneArray[0].getFullYear()}`);
     let [displaySlot, setDisplaySlot] = useState(false);
     let [sessionTimingData, setSessionTimingData] = useState([]);
+    let [getFeedbackValue, setGetFeedbackValue] = useState();
 
     let [firstSlot, setFirstSlot] = useState();
     let [secondSlot, setSecondSlot] = useState();
@@ -147,6 +156,8 @@ export default function gymDetail({ gymViewDetail }) {
     let [membershipData, setMembershipData] = useState([]);
     let [payableAmount, setPayableAmount] = useState();
     let [nextStart, setNextStart] = useState(false);
+
+    let [activeRiviewButton, setActiveReview] = useState(false);
 
     let [membershipDetails, setMembershipDetails] = useState({
         membershipId: "",
@@ -160,6 +171,122 @@ export default function gymDetail({ gymViewDetail }) {
 
     let [subscriptionId, setSubscriptionId] = useState();
     let [bookedSlot, setBookedSlot] = useState({});
+
+    let [openReview, setOpenReview] = useState(false);
+
+    let [starSelected, setStarSelected] = useState({
+        textColor1: 'text-gray-200',
+        textColor2: 'text-gray-200',
+        textColor3: 'text-gray-200',
+        textColor4: 'text-gray-200',
+        textColor5: 'text-gray-200',
+    })
+
+    let [ratings, setRatings] = useState();
+
+    let [userReviewData, setUserReviewData] = useState([]);
+    let [newReview, setNewReview] = useState(false);
+
+    let [limit, setLimit] = useState(5);
+
+    let [disable, setDisable] = useState(false);
+
+    let [noReviews, setNoReviews] = useState(true);
+    // get user reviews
+
+    useEffect(() => {
+        try {
+
+            const option = {
+                method: "GET"
+            }
+
+            fetch(`http://localhost/browseGym/gymViewDetail/getUserReviews?gymId=${gymIdName}&limit=${limit}`, option).then(async (res) => {
+
+                let reviewData = await res.json();
+
+                if (reviewData.data.length < limit) {
+                    setDisable(true);
+                } else {
+                    setDisable(false);
+                }
+                if (reviewData.data.length > 0) {
+                    setNoReviews(false);
+                    reviewData.data.map((val, i) => {
+                        let ratings = [];
+                        let date = new Date(val.createdAt)
+                        reviewData.data[i].createdAt = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`
+
+                        for (let i = 0; i < val.ratings; i++) {
+                            ratings.push(i);
+                        }
+
+                        reviewData.data[i].ratings = ratings
+                    })
+                    console.log(reviewData.data[0].ratings)
+
+                    setUserReviewData(reviewData.data);
+                } else {
+                    setNoReviews(true);
+                }
+
+
+            }).catch((err) => {
+                console.log(err);
+            })
+
+        } catch (err) {
+            console.log(err);
+        }
+
+    }, [newReview])
+
+    useEffect(() => {
+        console.log('page reloaded')
+    }, [activeRiviewButton]);
+    // checking booking
+    useEffect(() => {
+        try {
+
+            let userToken = localStorage.getItem("token");
+            if (!userToken) {
+                setActiveReview(false);
+            } else {
+                const option = {
+                    method: "GET",
+                    headers: {
+                        Authorization: `Bearer ${userToken}`
+                    }
+                }
+
+                fetch(`http://localhost/browseGym/gymViewDetail/checkBooking`, option).then(async (res) => {
+
+                    let checkBookingResponse = await res.json();
+
+                    if (checkBookingResponse.response) {
+                        if (checkBookingResponse.data.length > 0) {
+
+                            checkBookingResponse.data.map((val) => {
+                                if (val.sessionInfo.gymId == gymIdName) {
+                                    setActiveReview(true);
+                                }
+                            })
+                        } else {
+                            setActiveReview(false);
+                        }
+                    } else {
+                        setActiveReview(false);
+                    }
+
+                }).catch((err) => {
+                    console.log(err);
+                })
+            }
+
+        } catch (err) {
+            console.log(err);
+        }
+    }, [])
 
     useEffect(() => {
         try {
@@ -515,7 +642,7 @@ export default function gymDetail({ gymViewDetail }) {
                 const body = {
                     sessionId: bookedSlot.id,
                     date: bookedSlot.date,
-                    time : bookedSlot.sessionTiming
+                    time: bookedSlot.sessionTiming
                 }
 
                 const option = {
@@ -524,9 +651,9 @@ export default function gymDetail({ gymViewDetail }) {
                         Authorization: `Bearer ${userToken}`,
                         'Content-Type': 'application/json'
                     }
-                    ,body: JSON.stringify(body)
+                    , body: JSON.stringify(body)
                 }
-          
+
 
                 let slotBookingResponse = await fetch('http://localhost/browseGym/gymViewDetail/bookSlot', option);
                 slotBookingResponse = await slotBookingResponse.json();
@@ -550,6 +677,104 @@ export default function gymDetail({ gymViewDetail }) {
         setReserveWorkout(true);
     }
 
+
+
+    const handleReview = () => {
+        starSelected.textColor1 = "text-gray-200"
+        starSelected.textColor2 = "text-gray-200"
+        starSelected.textColor3 = "text-gray-200"
+        starSelected.textColor4 = "text-gray-200"
+        starSelected.textColor5 = "text-gray-200"
+
+        setStarSelected({ ...starSelected });
+        setOpenReview(true);
+    }
+
+    const closeFeedback = () => {
+        setOpenReview(false);
+    }
+
+    const getFeedback = (e) => {
+        setGetFeedbackValue(e.target.value);
+    }
+
+    const handleSelection = (id) => {
+        if (id == "1") {
+            setRatings(id);
+            starSelected.textColor1 = "text-yellow-400"
+        } else if (id === "2") {
+            setRatings(id);
+            starSelected.textColor1 = "text-yellow-400"
+            starSelected.textColor2 = "text-yellow-400"
+        } else if (id === "3") {
+            setRatings(id);
+            starSelected.textColor1 = "text-yellow-400"
+            starSelected.textColor2 = "text-yellow-400"
+            starSelected.textColor3 = "text-yellow-400"
+        }
+        else if (id === "4") {
+            setRatings(id);
+            starSelected.textColor1 = "text-yellow-400"
+            starSelected.textColor2 = "text-yellow-400"
+            starSelected.textColor3 = "text-yellow-400"
+            starSelected.textColor4 = "text-yellow-400"
+        }
+        else {
+            setRatings(id);
+            starSelected.textColor1 = "text-yellow-400"
+            starSelected.textColor2 = "text-yellow-400"
+            starSelected.textColor3 = "text-yellow-400"
+            starSelected.textColor4 = "text-yellow-400"
+            starSelected.textColor5 = "text-yellow-400"
+        }
+        setStarSelected({ ...starSelected });
+    }
+
+    const addFeedback = async () => {
+        try {
+
+            let userToken = localStorage.getItem("token");
+
+            if (!userToken) {
+                router.push('/login')
+            } else {
+                const body = {
+                    gymId: gymIdName,
+                    ratings: ratings,
+                    feedbackMessage: getFeedbackValue
+                }
+
+                const option = {
+                    method: "POST",
+                    headers: {
+                        Authorization: `Bearer ${userToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(body)
+                }
+
+                let feedbackResponse = await fetch('http://localhost/browseGym/gymViewDetail/addFeedback', option);
+                feedbackResponse = await feedbackResponse.json();
+
+                if (feedbackResponse.response) {
+                    setOpenReview(false);
+                    setNewReview(!newReview);
+                    toast.success(feedbackResponse.message);
+                } else {
+                    setOpenReview(false);
+                    toast.error(feedbackResponse.message);
+                }
+            }
+
+        } catch (err) {
+            console.log(err);
+        }
+    }
+
+    const handleLimit = () => {
+        setNewReview(!newReview);
+        setLimit(limit + 5);
+    }
 
     return (
         <>
@@ -576,7 +801,7 @@ export default function gymDetail({ gymViewDetail }) {
                                 </div>
 
                                 <div className="w-16 h-16 bg-green-600 rounded-md pt-2">
-                                    <p className="text-white text-center">20+</p>
+                                    <p className="text-white text-center">{gymViewDetail.reviewsCount}</p>
                                     <p className="text-white text-center">Reviews</p>
                                 </div>
 
@@ -589,6 +814,13 @@ export default function gymDetail({ gymViewDetail }) {
                                     <p className="text-md">{gymViewDetail.data.gymCity}</p>
                                 </div>
                             </div>
+                            {
+                                activeRiviewButton &&
+                                <div className=" mr-10 mb-10">
+                                    <Button className=" float-right h-10 w-32 rounded-md bg-white-600 text-gray-400 border hover:bg-gray-50" onClick={handleReview}>Give Review</Button>
+                                </div>
+                            }
+
                         </div>
 
                         <div className=" w-[60rem]  border-2 rounded-sm mb-5">
@@ -847,6 +1079,72 @@ export default function gymDetail({ gymViewDetail }) {
                     <Popup open={reservingWorkout} title={"Are you sure want to reserve workout?"} cancel="Cancel" logout="Reserve" logoutEvent={confirmReservation} cancelEvent={cancelReservation} />
                     <Popup open={nextStart} title={"Recurring payment Confirmation"} cancel="No" logout="Yes" logoutEvent={handlePayment} cancelEvent={notConfirmed} />
                     <Popup open={start} contentItem={"Subscription Already exists"} title={"Do you want to cancel the subscription?"} cancel="close" logout="Delete" logoutEvent={handleDelete} cancelEvent={handleClose} />
+                </div>
+                <div className="mb-20 mt-10 ml-10">
+                    <h1 className="text-3xl  font-semibold ">Customers Reviews & Ratings</h1>
+                    {
+                        noReviews ? 
+                        <p className="text-center mt-10 text-lg text-gray-400">No Reviews yet !</p>:
+                            <div className=" flex flex-wrap gap-x-10 gap-y-10 mt-10">
+                                {
+                                    userReviewData.map((val) => {
+                                        return (
+                                            <div className="w-[28rem] rounded-lg border ">
+                                                <div className=" flex justify-between">
+                                                    <div className="flex mt-5 ml-5 space-x-2">
+                                                        <Avatar className=" text-6xl " />
+                                                        <div className="mt-[-0.2rem]">
+                                                            <h1 className="font-semibold">{val.userViews.fullName}</h1>
+                                                            <h1 className="text-gray-400 text-sm">{val.createdAt}</h1>
+                                                        </div>
+                                                    </div>
+                                                    <div className=" mt-5 mr-5">
+                                                        {
+                                                            val.ratings.map((value) => {
+                                                                return (
+                                                                    <StarIcon className="text-yellow-400" />
+                                                                );
+
+                                                            })
+                                                        }
+                                                    </div>
+                                                </div>
+                                                <p className="w-[26rem] ml-5 mt-5 mb-4 text-gray-400">{val.feedbackMessage}</p>
+                                            </div>
+                                        );
+                                    })
+                                }
+                            </div>
+
+                    }
+                    {
+                        disable === false &&
+                        <div className="mt-6 mr-[50vw] ml-[20vw]">
+                            <Button className=" float-right h-10 w-32 rounded-full  bg-green-600 text-white  hover:bg-green-700" onClick={handleLimit}>See More</Button>
+                        </div>
+                    }
+                    <Dialog open={openReview} >
+                        <DialogTitle >
+                            <div>
+                                <p className=" cursor-pointer hover:text-green-600 transition text-center  mt-[-2rem] float-right mr-[-1rem]" onClick={closeFeedback}><CloseIcon /></p>
+                                <p className=" text-green-600 text-center font-semibold mt-4">How was your experience ?</p>
+                            </div>
+                        </DialogTitle>
+                        <DialogContentText className="text-center text-gray-400 text-sm w-[28rem] ml-4 mr-4">Your Review will help us to improve our service and make it user friendly for more users</DialogContentText>
+                        <DialogContent className="w-[30rem] h-[20rem]">
+                            <div className=" flex justify-center space-x-3 mt-3">
+                                <p className={`${starSelected.textColor1}`} onClick={() => { handleSelection("1") }}><StarIcon /></p>
+                                <p className={`${starSelected.textColor2}`} onClick={() => { handleSelection("2") }}><StarIcon /></p>
+                                <p className={`${starSelected.textColor3}`} onClick={() => { handleSelection("3") }}><StarIcon /></p>
+                                <p className={`${starSelected.textColor4}`} onClick={() => { handleSelection("4") }}><StarIcon /></p>
+                                <p className={`${starSelected.textColor5}`} onClick={() => { handleSelection("5") }}><StarIcon /></p>
+                            </div>
+
+                            <Textarea placeholder="Give feedback" className=" resize-none mt-5 w-80 h-32 mx-auto" name="feedback" onChange={getFeedback} />
+                            <Button className="mt-6 ml-14 h-10 w-80 rounded-md bg-green-600 text-white  hover:bg-green-700" onClick={addFeedback}>Submit feedback</Button>
+                        </DialogContent>
+
+                    </Dialog>
                 </div>
                 <Footer />
             </div>
