@@ -79,6 +79,8 @@ export default function partners() {
 
                             let newPartnerData = [];
 
+                            console.log(partnerInfo.data);
+
                             partnerInfo.data.map((val) => {
                                 let partnerData = Object.values(val.partnerInfo);
                                 partnerData.push('View Detail');
@@ -126,7 +128,7 @@ export default function partners() {
                     let newPartnerData = [];
 
                     partnerInfo.data.map((val) => {
-                        let partnerData = Object.values(val);
+                        let partnerData = Object.values(val.partnerInfo);
                         partnerData.push('View Detail');
                         newPartnerData.push(partnerData);
                     })
@@ -161,7 +163,7 @@ export default function partners() {
                     let newPartnerData = [];
 
                     partnerInfo.data.map((val) => {
-                        let partnerData = Object.values(val);
+                        let partnerData = Object.values(val.partnerInfo);
                         partnerData.push('View Detail');
                         newPartnerData.push(partnerData);
                     })
@@ -316,7 +318,7 @@ export default function partners() {
                         </div>
                         <div className=" flex space-x-4">
                             <Button className=" w-20 h-11 flex justify-around hover:bg-green-700  bg-green-600  p-2 " onClick={handleFilter}>{filterSwitch ? <FilterAltOffIcon className="" /> : <FilterAltIcon className="" />} Filter</Button>
-                            <Button className=" w-20 h-11 flex justify-around hover:bg-green-700  bg-green-600  p-2 "><SortIcon className="" />  Sort</Button>
+                            {/* <Button className=" w-20 h-11 flex justify-around hover:bg-green-700  bg-green-600  p-2 "><SortIcon className="" />  Sort</Button> */}
                         </div>
                     </div>
                     {

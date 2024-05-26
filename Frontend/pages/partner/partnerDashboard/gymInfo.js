@@ -274,6 +274,10 @@ export default function gymInfo() {
   const addMoreAmenities = () => {
     setDisplayAmenities(false);
   }
+ 
+  const cancelUpdate = () => {
+    setDisplayAmenities(true);
+  }
 
   return (
     <>
@@ -377,9 +381,9 @@ export default function gymInfo() {
                       </div>
                     </div>
                     <div className="flex space-x-6 mt-5">
-                      {/* <Button className="w-20 bg-white hover:bg-gray-50 text-gray-400 border space-x-1">
-                    <span>Cancel</span>
-                  </Button> */}
+                      <Button className="w-20 bg-white hover:bg-gray-50 text-gray-400 border space-x-1" onClick={cancelUpdate}>
+                        <span>Cancel</span>
+                      </Button>
                       <Button className="w-20 bg-green-600 hover:bg-green-700 space-x-1" onClick={handleAmenitiesButton}>
                         <span>Update</span>
                       </Button>
@@ -459,19 +463,6 @@ export default function gymInfo() {
 
                   </div>
               }
-
-              <div className="w-[70vw] mt-4 gap-x-2 gap-y-3 flex flex-wrap">
-                {
-                  addedSlot.map((val) => {
-                    return (
-                      <div className=" w-24 h-8 border-2 mt-4 rounded-md">
-                        <p className=" text-center mt-0.5 text-gray-400">{val.sessionTiming}</p>
-                      </div>
-                    );
-                  })
-                }
-
-              </div>
               {
                 displaySession == false &&
                 <div className="flex space-x-9 mt-7 mb-5">
