@@ -94,6 +94,8 @@ const deleteUserInfoController = async (req, res) => {
 
 
     } catch (err) {
+        console.log(err);
+        
         res.json({
             message: "Something went wrong",
             response: false

@@ -64,11 +64,10 @@ export default function gymInfo() {
             router.push("/partner/partnerLogin")
           }
           else {
-            let arr = [null]
-            if (gymInfo.data.amenities !== arr) {
+            if (gymInfo.data.amenities == null ) {
               setDisplayAmenities(true);
             }
-            setGymData(gymInfo.data)
+              setGymData(gymInfo.data) 
           }
         })
         .catch((err) => {
@@ -302,6 +301,9 @@ export default function gymInfo() {
                   <>
                     <div className=" flex flex-wrap gap-x-4 gap-y-4 w-80">
                       {
+                        
+                        gymData.amenities != undefined &&
+                        
                         gymData.amenities.map((val) => {
                           return (
                             <div className=" bg-gray-50 rounded-xl">

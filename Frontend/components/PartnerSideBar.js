@@ -33,7 +33,7 @@ export default function PartnerSideBar() {
     return (
         <>
             <div className=" w-72  m-[-8px] p-1  mb-10">
-                <Link href="/partner/partnerDashboard"><h1 className=' text-green-600 text-3xl font-semibold text-center mt-8 cursor-pointer'>TrampFit</h1></Link>
+                <h1 className=' text-green-600 text-3xl font-semibold text-center mt-8 '>TrampFit</h1>
 
                 <List className='bg-white mt-8 ml-6 space-y-2'>
                     {
